@@ -17,14 +17,17 @@ for(var n in Game.rooms) {
 var rooms = RoomController.getRoomControllers();
 for(var n in rooms) {
     var room = rooms[n];
-    //room.loadCreeps();
+    room.loadCreeps();
     //room.populate();
 
-    console.log('Name: ' + room.room.name + 
+    console.log('**Room Name**: ' + room.room.name + 
         ' | Population: ' + room.creepUtility.getTotalPopulation() + 
-        ' | Next death: ' + room.creepUtility.getNextExpectedDeath() + ' ticks'
+        ' | Next death: ' + room.creepUtility.getNextExpectedDeath() + ' ticks' + 
+        ' | Population: ' + room.creepUtility.getTotalPopulation() +
+        ' | HARVESTERS: ' + room.creepUtility.getType('harvester').total + 
+        ' | UPGRADERS: ' + room.creepUtility.getType('upgrader').total + 
+        ' | BUILDERS: ' + room.creepUtility.getType('builder').total
         );
-
     /*console.log(
         room.room.name + ' | ' +
         'goals met:' +
@@ -43,23 +46,10 @@ for(var n in rooms) {
 };
 
 module.exports.loop = function () {
-    //roomMain = new roomMain(room,roomController);
-    //this.creepUtility = new creepUtility(this.room);
-    //var pop = creepUtility.getTotalPopulation();
-    //console.log('Population: ' + op);
-    
-
-
-    //var sources = creep.room.find(FIND_SOURCES);
-    //console.log('Sources: ' + sources.length);
 
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    console.log('Harvesters: ' + harvesters.length);
-
     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-    console.log('Upgraders: ' + upgraders.length);
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-    console.log('Builders: ' + builders.length);
 
     if(harvesters.length < 8) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'harvester'});
@@ -120,7 +110,7 @@ module.exports.loop = function () {
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
         var numberSources = creep.room.find(FIND_SOURCES);
-        console.log('Name: ' + name);
+        //console.log('Name: ' + name);
         if (assigneeMap.get(name) == null) {
             for (x in numberSources) {
                 //console.log(numberSources[x]);
@@ -129,7 +119,7 @@ module.exports.loop = function () {
                     assigneeMap.set(name,numberSources[x]);
                     lastAssignment=numberSources[x];
                     assignedToSet.add(name);
-                    console.log('Harvester Source Assignment: ' + name + ': ' + numberSources[x]);
+                    //console.log('Harvester Source Assignment: ' + name + ': ' + numberSources[x]);
                 }
             }
         }           
@@ -164,6 +154,6 @@ module.exports.loop = function () {
             roleRepairer.run(creep);
         }
     }
-    console.log(harvestersAssigned.size);
+    //console.log(harvestersAssigned.size);
     utility.cleanUp();
 }

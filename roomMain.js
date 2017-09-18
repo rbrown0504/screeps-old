@@ -3,33 +3,106 @@ var creepUtility = require('creepUtility');
 function roomMain(room, roomController) {
     this.room = room;
     this.roomController = roomController;
-    this.creeps = [];
-    this.structures = [];
-
+    this.creeps = this.room.find(FIND_MY_CREEPS);
+    this.structures = this.room.find(
+        FIND_MY_STRUCTURES,
+        {
+            filter: filterExtensions
+        }
+    );
 
     this.creepUtility = new creepUtility(this.room);
-    
-    //this.depositManager = new Deposits(this.room);
-    //this.resourceManager = new Resources(this.room, this.population);
-    //this.constructionManager = new Constructions(this.room);
-    //this.population.typeDistribution.CreepBuilder.max = 4;
-    //this.population.typeDistribution.CreepMiner.max = (this.resourceManager.getSources().length+1)*2;
-    //this.population.typeDistribution.CreepCarrier.max = this.population.typeDistribution.CreepBuilder.max+this.population.typeDistribution.CreepMiner.max;
-    //this.creepFactory = new CreepFactory(this.depositManager, this.resourceManager, this.constructionManager, this.population, this.roomHandler);
+
+    this.spawns = [];
+    for(var n in Game.spawns) {
+        var s = Game.spawns[n];
+        if(s.room == this.room) {
+            this.spawns.push(s);
+        }
+    }
 }
 
-Room.prototype.loadCreeps = function() {
+roomMain.prototype.loadCreeps = function() {
     var creeps = this.room.find(FIND_MY_CREEPS);
     for(var n in creeps) {
-        var c = this.creepFactory.load(creeps[n]);
+        var c = this.creepUtility.load(creeps[n]);
         if(c) {
             this.creeps.push(c);
         }
     }
-
-    /*this.distributeBuilders();
-    this.distributeResources('CreepMiner');
-    this.distributeResources('CreepCarrier');
-    this.distributeCarriers();*/
+    console.log('***********************************************');
+    //this.handleResources('harvester');
+    //this.handleBuilders();
 };
+
+roomMain.prototype.handleResources = function(type) {
+    var sources = this.creepUtility.getSources();
+    var perSource = Math.ceil(this.creepUtility.getType(type).total/sources.length);
+    var counter = 0;
+    var source = 0;
+    console.log('***' + this.creeps.length);
+    for(var i = 0; i < this.creeps.length; i++) {
+        var creep = this.creeps[i];
+        if(creep.remember('role') != type) {
+            continue;
+        }
+
+        if(!sources[source]) {
+            continue;
+        }
+
+        creep.remember('source', sources[source].id);
+        console.log('***' + sources[source].id);
+        counter++;
+        if(counter >= perSource) {
+            counter = 0;
+            source++;
+        }
+    }
+};
+roomMain.prototype.handleBuilders = function() {
+    var builderStats = this.creepUtility.getType('builder');
+    if(this.spawns.length == 0) {
+        for(var i = 0; i < this.creeps.length; i++) {
+            var creep = this.creeps[i];
+            if(creep.remember('role') != 'builder') {
+                continue;
+            }
+
+            creep.remember('forceControllerUpgrade', false);
+        }
+        return;
+    }
+    if(builderStats <= 3) {
+        for(var i = 0; i < this.creeps.length; i++) {
+            var creep = this.creeps[i];
+            if(creep.remember('role') != 'builder') {
+                continue;
+            }
+            creep.remember('forceControllerUpgrade', false);
+        }
+    } else {
+        var c = 0;
+        for(var i = 0; i < this.creeps.length; i++) {
+            var creep = this.creeps[i];
+            if(creep.remember('role') != 'builder') {
+                continue;
+            }
+            creep.remember('forceControllerUpgrade', true);
+            c++;
+            if(c == 2) {
+                break;
+            }
+        }
+    }
+}
+
 module.exports = roomMain;
+
+function filterExtensions(structure) {
+    if(structure.structureType == STRUCTURE_EXTENSION) {
+        return true;
+    }
+
+    return false;
+}
