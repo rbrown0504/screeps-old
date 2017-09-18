@@ -21,11 +21,10 @@ var roleBuilder = {
             }
 	    }
 	    else {
-	    	//FIND NEAREST SOURCE AND GET STUFF
-	    	var source = creep.pos.findClosestByRange(FIND_SOURCES);
-	    	creep.memory.sourceId = source.id;
-	    	var source = Game.getObjectById(creep.memory.sourceId);
-			creep.moveTo(source,{visualizePathStyle: {stroke: '#ffaa00'}}); // OK
+	        var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
 	    }
 	}
 };

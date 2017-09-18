@@ -3,14 +3,52 @@ var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleRepairer = require('role.repairer');
 
-module.exports.loop = function () {
+//load room utilities
+var roomMain = require('roomMain');
+var RoomController = require('roomController');
 
-    for(var name in Memory.creeps) {
-        if(!Game.creeps[name]) {
-            delete Memory.creeps[name];
-            console.log('Clearing non-existing creep memory:', name);
-        }
-    }
+var utility = require('utility');
+//load all rooms
+
+for(var n in Game.rooms) {
+    var roomController = new roomMain(Game.rooms[n], RoomController);
+    RoomController.set(Game.rooms[n].name, roomController);
+};
+var rooms = RoomController.getRoomControllers();
+for(var n in rooms) {
+    var room = rooms[n];
+    //room.loadCreeps();
+    //room.populate();
+
+    console.log('Name: ' + room.room.name + 
+        ' | Population: ' + room.creepUtility.getTotalPopulation() + 
+        ' | Next death: ' + room.creepUtility.getNextExpectedDeath() + ' ticks'
+        );
+
+    /*console.log(
+        room.room.name + ' | ' +
+        'goals met:' +
+        room.population.goalsMet() +
+        ', population: ' +
+        room.population.getTotalPopulation() + '/' + room.population.getMaxPopulation() +
+        ' (' + room.population.getType('CreepBuilder').total + '/' +
+        room.population.getType('CreepMiner').total + '/' +
+        room.population.getType('CreepCarrier').total + '/' +
+        room.population.getType('CreepSoldier').total + 
+        '), ' +
+        'resources at: ' + parseInt( (room.depositManager.energy() / room.depositManager.energyCapacity())*100) +'%, ' +
+        'max resources: ' + room.depositManager.energyCapacity() +'u, ' +
+        'next death: ' + room.population.getNextExpectedDeath() +' ticks'
+    );*/
+};
+
+module.exports.loop = function () {
+    //roomMain = new roomMain(room,roomController);
+    //this.creepUtility = new creepUtility(this.room);
+    //var pop = creepUtility.getTotalPopulation();
+    //console.log('Population: ' + op);
+    
+
 
     //var sources = creep.room.find(FIND_SOURCES);
     //console.log('Sources: ' + sources.length);
@@ -115,8 +153,6 @@ module.exports.loop = function () {
                     creep.moveTo(Game.spawns['Spawn1']);
                 }
             }
-
-
         }
         if(creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep);
@@ -129,4 +165,5 @@ module.exports.loop = function () {
         }
     }
     console.log(harvestersAssigned.size);
+    utility.cleanUp();
 }
