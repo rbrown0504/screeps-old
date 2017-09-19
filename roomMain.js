@@ -1,9 +1,10 @@
+var CreepHandler = require('creepHandler');
 var creepUtility = require('creepUtility');
 
 function roomMain(room, roomController) {
     this.room = room;
     this.roomController = roomController;
-    this.creeps = this.room.find(FIND_MY_CREEPS);
+    this.creeps = [];
     this.structures = this.room.find(
         FIND_MY_STRUCTURES,
         {
@@ -12,6 +13,7 @@ function roomMain(room, roomController) {
     );
 
     this.creepUtility = new creepUtility(this.room);
+    this.creepHandler = new CreepHandler(this.creepUtility);
 
     this.spawns = [];
     for(var n in Game.spawns) {
@@ -24,8 +26,10 @@ function roomMain(room, roomController) {
 
 roomMain.prototype.loadCreeps = function() {
     var creeps = this.room.find(FIND_MY_CREEPS);
+    //console.log('JSON Creeps: ' + JSON.stringify(creeps));
     for(var n in creeps) {
-        var c = this.creepUtility.load(creeps[n]);
+        var c = this.creepHandler.load(creeps[n]);
+        console.log('JSON Creeps LOAD: ' + JSON.stringify(c));
         if(c) {
             this.creeps.push(c);
         }
@@ -43,6 +47,7 @@ roomMain.prototype.handleResources = function(type) {
     console.log('***' + this.creeps.length);
     for(var i = 0; i < this.creeps.length; i++) {
         var creep = this.creeps[i];
+        console.log(JSON.stringify(creep));
         if(creep.remember('role') != type) {
             continue;
         }

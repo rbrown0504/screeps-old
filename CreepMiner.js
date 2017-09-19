@@ -4,18 +4,19 @@ var ACTIONS = {
 	DEPOSIT: 2
 };
 
-function CreepMiner(creep, resourceManager) {
+function CreepMiner(creep, creepUtility) {
 	this.cache = new Cache();
 	this.creep = creep;
-	this.resourceManager = resourceManager;
+	this.creepUtility = creepUtility;
 	this.resource = false;
 };
 
 CreepMiner.prototype.init = function() {
+	console.log('I made it to the miner utility');
 	this.remember('role', 'CreepMiner');
 
 	if(!this.remember('source')) {
-		var src = this.resourceManager.getAvailableResource();
+		var src = this.creepUtility.getAvailableResource();
 		this.remember('source', src.id);
 	}
 	if(!this.remember('srcRoom')) {
@@ -25,7 +26,7 @@ CreepMiner.prototype.init = function() {
 		return;
 	}
 
-	this.resource = this.resourceManager.getResourceById(this.remember('source'));
+	this.resource = this.creepUtility.getResourceById(this.remember('source'));
 
 	this.act();
 };

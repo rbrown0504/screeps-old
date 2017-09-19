@@ -1,8 +1,8 @@
 var CreepMiner = require('CreepMiner');
 var CreepBase = require('CreepBase');
 var utility = require('utility');
-
 var Cache = require('Cache');
+
 function creepUtility(room) {
 	this.cache = new Cache();
 	this.room = room;
@@ -46,18 +46,19 @@ function creepUtility(room) {
 
 }
 
-creepUtility.prototype.load = function(creep) {
+/*creepUtility.prototype.load = function(creep) {
 	var loadedCreep = null;
 	var role = creep.memory.role;
 	if(!role) {
 		role = creep.name.split('-')[0];
 	}
-
+    console.log(role);
 	switch(role) {
-		/*case 'builder':
+
+		case 'builder':
 			loadedCreep = new CreepBuilder(creep, this.depositManager, this.constructionsManager);
-		break;*/
-		case 'harvester':
+		break;
+		case 'CreepMiner':
 			loadedCreep = new CreepMiner(creep, this.resourceManager);
 		break;
 	}
@@ -70,7 +71,7 @@ creepUtility.prototype.load = function(creep) {
 	loadedCreep.init();
 
 	return loadedCreep;
-};
+};*/
 
 
 creepUtility.prototype.getType = function(type) {
