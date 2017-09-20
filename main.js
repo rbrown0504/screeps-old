@@ -10,52 +10,60 @@ var RoomController = require('roomController');
 var utility = require('utility');
 //load all rooms
 
-for(var n in Game.rooms) {
-    var roomController = new roomMain(Game.rooms[n], RoomController);
-    RoomController.set(Game.rooms[n].name, roomController);
-};
-var rooms = RoomController.getRoomControllers();
-for(var n in rooms) {
-    var room = rooms[n];
-    room.loadCreeps();
-    //room.populate();
 
-    console.log('**Room Name**: ' + room.room.name + 
-        ' | Population: ' + room.creepUtility.getTotalPopulation() + 
-        ' | Next death: ' + room.creepUtility.getNextExpectedDeath() + ' ticks' + 
-        ' | Population: ' + room.creepUtility.getTotalPopulation() +
-        ' | HARVESTERS: ' + room.creepUtility.getType('harvester').total + 
-        ' | UPGRADERS: ' + room.creepUtility.getType('upgrader').total + 
-        ' | BUILDERS: ' + room.creepUtility.getType('builder').total
-        );
-    /*console.log(
-        room.room.name + ' | ' +
-        'goals met:' +
-        room.population.goalsMet() +
-        ', population: ' +
-        room.population.getTotalPopulation() + '/' + room.population.getMaxPopulation() +
-        ' (' + room.population.getType('CreepBuilder').total + '/' +
-        room.population.getType('CreepMiner').total + '/' +
-        room.population.getType('CreepCarrier').total + '/' +
-        room.population.getType('CreepSoldier').total + 
-        '), ' +
-        'resources at: ' + parseInt( (room.depositManager.energy() / room.depositManager.energyCapacity())*100) +'%, ' +
-        'max resources: ' + room.depositManager.energyCapacity() +'u, ' +
-        'next death: ' + room.population.getNextExpectedDeath() +' ticks'
-    );*/
-};
 
 module.exports.loop = function () {
+    for(var n in Game.rooms) {
+    var roomController = new roomMain(Game.rooms[n], RoomController);
+    RoomController.set(Game.rooms[n].name, roomController);
+    };
+    var rooms = RoomController.getRoomControllers();
+    //console.log(JSON.stringify(rooms));
+    for(var n in rooms) {
+        var room = rooms[n];
+        //console.log(JSON.stringify(room));
+        room.loadCreeps();
+        room.populate();
+
+        console.log('**Room Name**: ' + room.room.name + 
+            ' | Population: ' + room.creepUtility.getTotalPopulation() + 
+            ' | Next death: ' + room.creepUtility.getNextExpectedDeath() + ' ticks' + 
+            ' | Population: ' + room.creepUtility.getTotalPopulation() +
+            ' | MINERS: ' + room.creepUtility.getType('roleMiner').total + 
+            ' | CARRIERS: ' + room.creepUtility.getType('roleCarrier').total + 
+            ' | HARVESTERS: ' + room.creepUtility.getType('harvester').total + 
+            ' | UPGRADERS: ' + room.creepUtility.getType('upgrader').total + 
+            ' | BUILDERS: ' + room.creepUtility.getType('builder').total
+            );
+        console.log('test');
+        /*console.log(
+            room.room.name + ' | ' +
+            'goals met:' +
+            room.population.goalsMet() +
+            ', population: ' +
+            room.population.getTotalPopulation() + '/' + room.population.getMaxPopulation() +
+            ' (' + room.population.getType('CreepBuilder').total + '/' +
+            room.population.getType('CreepMiner').total + '/' +
+            room.population.getType('CreepCarrier').total + '/' +
+            room.population.getType('CreepSoldier').total + 
+            '), ' +
+            'resources at: ' + parseInt( (room.depositManager.energy() / room.depositManager.energyCapacity())*100) +'%, ' +
+            'max resources: ' + room.depositManager.energyCapacity() +'u, ' +
+            'next death: ' + room.population.getNextExpectedDeath() +' ticks'
+        );*/
+    };
 
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
+    var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleMiner');
+    var carriers = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleCarrier');
 
-    if(harvesters.length < 8) {
+    if(harvesters.length < 3) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'harvester'});
         console.log('Spawning new harvester: ' + newName);
     }
-    if(upgraders.length < 2) {
+    if(upgraders.length < 3) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'upgrader'});
         console.log('Spawning new upgrader: ' + newName);
     }
@@ -63,7 +71,15 @@ module.exports.loop = function () {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'builder'});
         console.log('Spawning new builder: ' + newName);
     }
-    
+    if(miners.length < 2) {
+        var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'roleMiner'});
+        console.log('Spawning new miner: ' + newName);
+    }
+    if(carriers.length < 1) {
+        var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'roleCarrier'});
+        console.log('Spawning new carrier: ' + newName);
+    }
+
     if(Game.spawns['Spawn1'].spawning) { 
         var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
         Game.spawns['Spawn1'].room.visual.text(
@@ -124,25 +140,11 @@ module.exports.loop = function () {
             }
         }           
     }
-    
-    var harvestersAssigned = new Set();
 
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
         if(creep.memory.role == 'harvester') {
-            harvestersAssigned.add(creep);
-            //roleHarvester.run(creep);
-            if(creep.carry.energy < creep.carryCapacity) {
-            //var sources = creep.room.find(FIND_SOURCES);
-                if(creep.harvest(assigneeMap.get(name)) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(assigneeMap.get(name));
-                }
-            }
-            else {
-                if(creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(Game.spawns['Spawn1']);
-                }
-            }
+            roleHarvester.run(creep);
         }
         if(creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep);

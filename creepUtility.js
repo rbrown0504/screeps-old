@@ -1,5 +1,4 @@
-var CreepMiner = require('CreepMiner');
-var CreepBase = require('CreepBase');
+/*Credit to for original for this foundation: screeps-ai https://github.com/beije/screeps-ai, any additional modifications made by myself.*/
 var utility = require('utility');
 var Cache = require('Cache');
 
@@ -7,6 +6,8 @@ function creepUtility(room) {
 	this.cache = new Cache();
 	this.room = room;
 	this.creeps = this.room.find(FIND_MY_CREEPS);
+	this.population = 0;
+	this.populationLevelMultiplier = 8;
 	this.creepTypes = {
 		harvester: {
 			total: 0,
@@ -23,6 +24,20 @@ function creepUtility(room) {
 			minExtensions: 0
 		},
 		upgrader: {
+			total: 0,
+			goalPercentage: 0.1,
+			currentPercentage: 0,
+			max: 5,
+			minExtensions: 2
+		},
+		roleMiner: {
+			total: 0,
+			goalPercentage: 0.1,
+			currentPercentage: 0,
+			max: 5,
+			minExtensions: 2
+		},
+		roleCarrier: {
 			total: 0,
 			goalPercentage: 0.1,
 			currentPercentage: 0,
@@ -46,36 +61,25 @@ function creepUtility(room) {
 
 }
 
-/*creepUtility.prototype.load = function(creep) {
-	var loadedCreep = null;
-	var role = creep.memory.role;
-	if(!role) {
-		role = creep.name.split('-')[0];
+creepUtility.prototype.getTypes = function(type) {
+	var types = [];
+	for(var n in this.creepTypes) {
+		types.push(n);
 	}
-    console.log(role);
-	switch(role) {
-
-		case 'builder':
-			loadedCreep = new CreepBuilder(creep, this.depositManager, this.constructionsManager);
-		break;
-		case 'CreepMiner':
-			loadedCreep = new CreepMiner(creep, this.resourceManager);
-		break;
-	}
-
-	if(!loadedCreep) {
-		return false;
-	}
-
-	utility.extend(loadedCreep, CreepBase);
-	loadedCreep.init();
-
-	return loadedCreep;
-};*/
+	return types;
+};
 
 
 creepUtility.prototype.getType = function(type) {
 	return this.creepTypes[type];
+};
+
+creepUtility.prototype.getTypes = function(type) {
+	var types = [];
+	for(var n in this.creepTypes) {
+		types.push(n);
+	}
+	return types;
 };
 
 creepUtility.prototype.getTotalPopulation = function() {

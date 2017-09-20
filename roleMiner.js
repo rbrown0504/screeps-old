@@ -5,15 +5,15 @@ var ACTIONS = {
 	DEPOSIT: 2
 };
 
-function CreepMiner(creep, creepUtility) {
+function roleMiner(creep, creepUtility) {
 	this.cache = new Cache();
 	this.creep = creep;
 	this.creepUtility = creepUtility;
 	this.resource = false;
 };
 
-CreepMiner.prototype.init = function() {
-	this.remember('role', 'CreepMiner');
+roleMiner.prototype.init = function() {
+	this.remember('role', 'roleMiner');
 
 	if(!this.remember('source')) {
 		var src = this.creepUtility.getAvailableResource();
@@ -29,7 +29,7 @@ CreepMiner.prototype.init = function() {
 	this.act();
 };
 
-CreepMiner.prototype.act = function() {
+roleMiner.prototype.act = function() {
 	var avoidArea = this.getAvoidedArea();
 	this.giveEnergy();
 	if(this.creep.energy == this.creep.energyCapacity) {
@@ -40,11 +40,13 @@ CreepMiner.prototype.act = function() {
 	this.remember('last-energy', this.creep.energy);
 }
 
-CreepMiner.prototype.giveEnergy = function() {
+roleMiner.prototype.giveEnergy = function() {
 	var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS, 1);
+	console.log('***************give energy from miner****************');
 	if(creepsNear.length){
 		for(var n in creepsNear){
-			if(creepsNear[n].memory.role === 'CreepMiner'){
+			if(creepsNear[n].memory.role === 'roleMiner'){
+				console.log('transferEnergy');
 				if(creepsNear[n].memory['last-energy'] == creepsNear[n].energy && creepsNear[n].energy < creepsNear[n].energyCapacity) {
 					this.creep.transferEnergy(creepsNear[n]);
 				}
@@ -53,4 +55,4 @@ CreepMiner.prototype.giveEnergy = function() {
 	}
 }
 
-module.exports = CreepMiner;
+module.exports = roleMiner;

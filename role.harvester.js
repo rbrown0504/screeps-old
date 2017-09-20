@@ -2,6 +2,8 @@ var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+        var depleted = false;
+        var needsEnergy = false;
         if(creep.carry.energy == 0) {
             depleted = true;
             needsEnergy = true;
@@ -29,6 +31,20 @@ var roleHarvester = {
         //console.log('inHaerver');
 
         if(creep.memory.working) {
+            /*var creepsNear = creep.pos.findInRange(FIND_MY_CREEPS, 1);
+            if(creepsNear.length){
+                for(var n in creepsNear){
+                    //console.log('creepsNear');
+                    //console.log(creepsNear[n].memory.role);
+                    if(creepsNear[n].memory.role === 'upgrader'){
+                        //console.log('Energy: ' + creepsNear[n].energy);
+                        //console.log('Energy capacity: ' + creepsNear[n].energyCapacity);
+                        if(creepsNear[n].energy < creepsNear[n].energyCapacity) {
+                            creep.transferEnergy(creepsNear[n]);
+                        }
+                    }
+                }
+            }*/
             var sources = creep.room.find(FIND_SOURCES);
             //console.log(sources);
             if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
@@ -50,5 +66,7 @@ var roleHarvester = {
         }
     }
 };
+
+
 
 module.exports = roleHarvester;
