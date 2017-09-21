@@ -40,7 +40,6 @@ roomMain.prototype.loadCreeps = function() {
             this.creeps.push(c);
         }
     }
-    console.log('*vv**********************************************');
     this.handleResources('roleMiner');
     //this.handleBuilders();
 };

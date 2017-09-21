@@ -35,7 +35,6 @@ module.exports.loop = function () {
             ' | UPGRADERS: ' + room.creepUtility.getType('upgrader').total + 
             ' | BUILDERS: ' + room.creepUtility.getType('builder').total
             );
-        console.log('test');
         /*console.log(
             room.room.name + ' | ' +
             'goals met:' +
@@ -59,23 +58,23 @@ module.exports.loop = function () {
     var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleMiner');
     var carriers = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleCarrier');
 
-    if(harvesters.length < 3) {
+    if(harvesters.length < 5) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'harvester'});
         console.log('Spawning new harvester: ' + newName);
     }
-    if(upgraders.length < 3) {
+    if(upgraders.length < 5) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'upgrader'});
         console.log('Spawning new upgrader: ' + newName);
     }
-    if(builders.length < 2) {
+    if(builders.length < 6) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'builder'});
         console.log('Spawning new builder: ' + newName);
     }
-    if(miners.length < 2) {
+    if(miners.length < 6) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'roleMiner'});
         console.log('Spawning new miner: ' + newName);
     }
-    if(carriers.length < 1) {
+    if(carriers.length < 10) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], undefined, {role: 'roleCarrier'});
         console.log('Spawning new carrier: ' + newName);
     }

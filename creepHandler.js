@@ -16,7 +16,7 @@ creepHandler.prototype.load = function(creep) {
 	if(!role) {
 		role = creep.name.split('-')[0];
 	}
-	console.log(role);
+	//console.log(role);
 	switch(role) {
 
 		/*case 'builder':
@@ -61,7 +61,7 @@ creepHandler.prototype.new = function(creepType, spawn) {
 
 	switch(creepType) {
 		case 'roleMiner':
-		case 'harvester':
+		/*case 'harvester':
 			if(level <= 1) {
 				abilities = [WORK, CARRY, MOVE];
 			}
@@ -72,7 +72,7 @@ creepHandler.prototype.new = function(creepType, spawn) {
 		case 'upgrader':
 			if(level <= 1) {
 				abilities = [WORK, CARRY, MOVE];
-			}
+			}*/
 		case 'roleBuilder':
 			if(level <= 1) {
 				abilities = [WORK, CARRY, MOVE];
