@@ -97,14 +97,27 @@ roomMain.prototype.populate = function() {
 
         if((this.depositManager.energy() / this.depositManager.energyCapacity()) > 0.2) {
             var types = this.creepUtility.getTypes()
+            console.log('# defined roles: ' + types.length);
             for(var i = 0; i < types.length; i++) {
                 var ctype = this.creepUtility.getType(types[i]);
-                if(this.depositManager.deposits.length > ctype.minExtensions) {
-                    if((ctype.goalPercentage > ctype.currentPercentage && ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75) {
-                        this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit());
-                        break;
-                    }
+                console.log('roomMain.populate.role: ' + types[i]);
+                console.log('roomMain.goalPercentage: ' + ctype.goalPercentage);
+                console.log('roomMain.currentPopulation: ' + this.creepUtility.getTotalPopulation());
+                console.log('roomMain.MaxPopulation: ' + this.creepUtility.getMaxPopulation());
+                console.log('roomMain.roleTotal:' + ctype.total);
+                console.log('roomMain.curr %:' + ((ctype.total / this.creepUtility.getMaxPopulation())*100));
+
+                if(    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75) {
+                    this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit());
+                    break;
                 }
+                //console.log('roomMain.populate: ' + this.depositManager.deposits.length);
+                //console.log('roomMain.extensions: ' + ctype.minExtensions);
+                //console.log('roomMain.goalPercentage: ' + ctype.goalPercentage);
+                //console.log('roomMain.currentPercentage: ' + ctype.currentPercentage);
+                /*if(this.depositManager.deposits.length > ctype.minExtensions) {
+                    
+                }*/
             }
         }
     }
