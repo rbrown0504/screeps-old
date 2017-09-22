@@ -53,20 +53,19 @@ function creepUtility(room) {
 		}
 		this.creepTypes[creepType].total++;
 	}
-
+    //console.log('creeptypes' + this.creepTypes);
 	for(var name in this.creepTypes) {
 		var curr = this.creepTypes[name];
+		//console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!total: '+ name +'-'+ curr.total);
 		this.creepTypes[name].currentPercentage = curr.total / this.getTotalPopulation();
 	}
 
 }
 
-creepUtility.prototype.getTypes = function(type) {
-	var types = [];
-	for(var n in this.creepTypes) {
-		types.push(n);
-	}
-	return types;
+creepUtility.prototype.getRolePopulation = function(roleName) {
+	var population = _.filter(Game.creeps, (creep) => creep.memory.role == roleName);
+	//console.log('getRolePopulation:' + population);
+	return population.length;
 };
 
 
@@ -91,8 +90,8 @@ creepUtility.prototype.getMaxPopulation = function() {
 		'max-population',
 		function() {
 			var population = 0;
-			for(var n in this.typeDistribution) {
-				population += this.typeDistribution[n].max;
+			for(var n in this.creepTypes) {
+				population += this.creepTypes[n].max;
 			}
 			return population;
 		}.bind(this)
