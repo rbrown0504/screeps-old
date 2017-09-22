@@ -89,10 +89,10 @@ roleCarrier.prototype.act = function() {
     if (this.creep.memory.working) {
     	var avoidArea = this.getAvoidedArea();
     	var targetDropped = this.creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {avoid: avoidArea});
-    	console.log('targetDropped:' + targetDropped);
-    	console.log('******************************************************************************');
+    	//console.log('targetDropped:' + targetDropped);
+    	//console.log('******************************************************************************');
     	if (targetDropped != null) {
-    		console.log('********************target dropped!!!!!!!**********************************************************');
+    		//console.log('********************target dropped!!!!!!!**********************************************************');
     		this.pickupEnergy();
     	}
     	//if there's nothing to pick up, go and get a full source
@@ -102,19 +102,19 @@ roleCarrier.prototype.act = function() {
     	this.harvestCreep();
 
 
-    	console.log('carrierHarvest');
+    	//console.log('carrierHarvest');
         
 
     	
     }
     if (this.creep.memory.carry) {
-    	console.log('carrierHarvest_deposit');
+    	//console.log('carrierHarvest_deposit');
     	if (this.creep.carry.energy == this.creep.carryCapacity) {
     		this.depositEnergy();
     	} else {
     		this.harvestCreep();	
     	}
-    	console.log('carrierDeposit_done');
+    	//console.log('carrierDeposit_done');
     }
 
 	
@@ -135,13 +135,13 @@ roleCarrier.prototype.depositEnergy = function() {
     
 	if(this.depositFor == DEPOSIT_FOR.POPULATION) {
 		var deposit = this.getDeposit();
-		console.log('Deposit: ' + deposit);
+		//console.log('Deposit: ' + deposit);
 		this.creep.moveTo(deposit, {avoid: avoidArea});
 		this.creep.transfer(deposit,RESOURCE_ENERGY);
 	}
 
 	if(this.depositFor == DEPOSIT_FOR.CONSTRUCTION) {
-		console.log('deposit for construction');
+		//console.log('deposit for construction');
 		var worker = this.getWorker();
 		var range = 1;
 		if(!worker) {
@@ -193,8 +193,8 @@ roleCarrier.prototype.getDeposit = function() {
 	)
 };
 roleCarrier.prototype.pickupEnergy = function() {
-	console.log('roleCarrier.pickupEnergy');
-	console.log('Energy: '+this.creep.energy);
+	//console.log('roleCarrier.pickupEnergy');
+	//console.log('Energy: '+this.creep.energy);
 	this.creep.energy=0;
 	
 	var avoidArea = this.getAvoidedArea();
@@ -203,9 +203,9 @@ roleCarrier.prototype.pickupEnergy = function() {
 	}
 
 	var target = this.creep.pos.findInRange(FIND_DROPPED_RESOURCES,50);
-	console.log('***********************target: ' + target);
+	//console.log('***********************target: ' + target);
 	if(target.length) {
-		console.log('roleCarrier.pickupEnergy.pickup');
+		//console.log('roleCarrier.pickupEnergy.pickup');
 		this.creep.moveTo(target[0]);
 	    this.creep.pickup(target[0]);
 	}
@@ -251,15 +251,15 @@ roleCarrier.prototype.harvestCreep = function() {
         this.remember('working', true);
     }*/
 
-	console.log('roleCarrier.harvestCreep');
+	//console.log('roleCarrier.harvestCreep');
 	var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS,50);
-	console.log('roleCarrier.harvestCreep.creepsNear' + creepsNear);
+	//console.log('roleCarrier.harvestCreep.creepsNear' + creepsNear);
 
 	if (this.creep.memory.working) {
 		if(creepsNear.length){
 			for(var n in creepsNear){
 				if(creepsNear[n].memory.role === 'roleMiner' && (creepsNear[n].energy != 0) && (this.creep.carry.energy< this.creep.carryCapacity) ){
-					console.log('transferring to carrier from miner');
+					//console.log('transferring to carrier from miner');
 					this.creep.moveTo(creepsNear[n]);
 					creepsNear[n].transfer(this.creep,RESOURCE_ENERGY);
 				} else {
@@ -271,10 +271,10 @@ roleCarrier.prototype.harvestCreep = function() {
 	if (this.creep.memory.carry) {
 		if(creepsNear.length){
 			for(var n in creepsNear){
-				console.log('roleCarrier.harvestCreep.roleCheck');
+				//console.log('roleCarrier.harvestCreep.roleCheck');
 				if( (creepsNear[n].memory.role === 'builder' || creepsNear[n].memory.role === 'upgrader') && (creepsNear[n].carry.energy < creepsNear[n].carryCapacity) ) {
-	            	console.log('carrier gives to creep who needs it');
-	            	console.log('creep: ' + this.creep + ' to ' + creepsNear[n]);
+	            	//console.log('carrier gives to creep who needs it');
+	            	//console.log('creep: ' + this.creep + ' to ' + creepsNear[n]);
 	            	//console.log(creepsNear.pos);
 					this.creep.moveTo(creepsNear[n]);				
 	                this.creep.transfer(creepsNear[n],RESOURCE_ENERGY);

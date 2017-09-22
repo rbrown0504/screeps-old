@@ -42,11 +42,10 @@ roleMiner.prototype.act = function() {
 
 roleMiner.prototype.giveEnergy = function() {
 	var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS, 1);
-	console.log('***************give energy from miner****************');
 	if(creepsNear.length){
 		for(var n in creepsNear){
 			if(creepsNear[n].memory.role === 'roleMiner'){
-				console.log('transferEnergy');
+				//console.log('transferEnergy');
 				if(creepsNear[n].memory['last-energy'] == creepsNear[n].energy && creepsNear[n].energy < creepsNear[n].energyCapacity) {
 					this.creep.transferEnergy(creepsNear[n]);
 				}

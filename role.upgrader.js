@@ -42,7 +42,7 @@ var roleUpgrader = {
                     }
                 }
             }
-
+            
             var sources = creep.room.find(FIND_SOURCES);
             /*if (minersFound) {
                 console.log('***************upgrader get energy from miner****************');

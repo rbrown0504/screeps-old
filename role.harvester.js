@@ -25,11 +25,6 @@ var roleHarvester = {
             creep.memory.working = true;
         }
 
-        //console.log(creep.memory.carry);
-        //console.log(creep.memory.working);
-
-        //console.log('inHaerver');
-
         if(creep.memory.working) {
             /*var creepsNear = creep.pos.findInRange(FIND_MY_CREEPS, 1);
             if(creepsNear.length){

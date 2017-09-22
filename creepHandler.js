@@ -46,11 +46,13 @@ creepHandler.prototype.new = function(creepType, spawn) {
 	var abilities = [];
 	var id = new Date().getTime();
 	var creepLevel = this.creepUtility.getTotalPopulation() / this.creepUtility.populationLevelMultiplier;
+	//console.log('full deposits ' + this.depositManager.getFullDeposits().length);
 	var resourceLevel = this.depositManager.getFullDeposits().length / 5;
 	var level = Math.floor(creepLevel + resourceLevel);
 	if(this.creepUtility.getTotalPopulation() < 5){
 		level = 1;
 	}
+
 	// TOUGH          10
 	// MOVE           50
 	// CARRY          50
