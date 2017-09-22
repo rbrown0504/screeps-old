@@ -1,6 +1,7 @@
 /*Credit to for original for this foundation: screeps-ai https://github.com/beije/screeps-ai, any additional modifications made by myself.*/
 var CreepBase = require('CreepBase');
 var roleMiner = require('roleMiner');
+var roleBuilder = require('roleBuilder');
 var roleCarrier = require('roleCarrier');
 var utility = require('utility');
 
@@ -19,15 +20,14 @@ creepHandler.prototype.load = function(creep) {
 	//console.log(role);
 	switch(role) {
 
-		/*case 'builder':
-			loadedCreep = new CreepBuilder(creep, this.depositManager, this.constructionsManager);
-		break;*/
-
+		case 'roleBuilder':
+			loadedCreep = new roleBuilder(creep, this.depositManager, this.constructionsManager);
+		break;
 		case 'roleMiner':
 			loadedCreep = new roleMiner(creep, this.creepUtility);
 		break;
 		case 'roleCarrier':
-			loadedCreep = new roleCarrier(creep, this.depositManager, this.creepUtility, this.constructionsManager);
+			loadedCreep = new roleCarrier(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
 		break;
 	}
 
@@ -166,7 +166,8 @@ creepHandler.prototype.new = function(creepType, spawn) {
 				abilities = [CARRY, MOVE];
 			} else
 			if(level <= 2) {
-				abilities = [CARRY, CARRY, MOVE];
+				//abilities = [CARRY, CARRY, MOVE];
+				abilities = [CARRY, CARRY, WORK, MOVE];
 			} else
 			if(level <= 3) {
 				abilities = [CARRY, CARRY, MOVE, MOVE];

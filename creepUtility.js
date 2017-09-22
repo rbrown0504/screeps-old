@@ -9,25 +9,18 @@ function creepUtility(room) {
 	this.population = 0;
 	this.populationLevelMultiplier = 8;
 	this.creepTypes = {
-		roleCarrier: {
-			total: 0,
-			goalPercentage: 25,
-			currentPercentage: 0,
-			max: 5,
-			minExtensions: 0
-		},
 		roleMiner: {
 			total: 0,
 			goalPercentage: 25,
 			currentPercentage: 0,
-			max: 5,
+			max: 2,
 			minExtensions: 0
 		},
-		upgrader: {
+		roleCarrier: {
 			total: 0,
-			goalPercentage: 25,
+			goalPercentage: 40,
 			currentPercentage: 0,
-			max: 5,
+			max: 10,
 			minExtensions: 0
 		},
 		roleBuilder: {
@@ -35,6 +28,13 @@ function creepUtility(room) {
 			goalPercentage: 25,
 			currentPercentage: 0,
 			max: 1,
+			minExtensions: 0
+		},
+		upgrader: {
+			total: 0,
+			goalPercentage: 25,
+			currentPercentage: 0,
+			max: 4,
 			minExtensions: 0
 		},
 		builder: {
