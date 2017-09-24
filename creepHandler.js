@@ -1,8 +1,11 @@
 /*Credit to for original for this foundation: screeps-ai https://github.com/beije/screeps-ai, any additional modifications made by myself.*/
 var CreepBase = require('CreepBase');
-var roleMiner = require('roleMiner');
-var roleBuilder = require('roleBuilder');
+//var roleMiner = require('roleMiner');
+var roleBuilder = require('role.builder');
 var roleCarrier = require('roleCarrier');
+var roleHarvester = require('roleHarvester');
+var roleUpgrader = require('role.upgrader');
+var roleRepairer = require('role.repairer');
 var utility = require('utility');
 
 function creepHandler(creepUtility, depositManager, constructionsManager) {
@@ -23,11 +26,26 @@ creepHandler.prototype.load = function(creep) {
 		case 'roleBuilder':
 			loadedCreep = new roleBuilder(creep, this.depositManager, this.constructionsManager);
 		break;
-		case 'roleMiner':
-			loadedCreep = new roleMiner(creep, this.creepUtility);
+		case 'roleHarvester':
+			loadedCreep = new roleHarvester(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
 		break;
+		case 'upgrader':
+			loadedCreep = roleUpgrader.run(creep);;
+		break;
+
+		case 'builder':
+			loadedCreep = roleBuilder.run(creep);;
+		break;
+
+		case 'repairer':
+			loadedCreep = roleRepairer.run(creep);;
+		break;
+
 		case 'roleCarrier':
 			loadedCreep = new roleCarrier(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
+		break;
+		case 'roleScout':
+			loadedCreep = new roleScout(creep, this.depositManager, this.constructionsManager);
 		break;
 	}
 
@@ -62,18 +80,51 @@ creepHandler.prototype.new = function(creepType, spawn) {
 	// HEAL           200
 
 	switch(creepType) {
-		case 'roleMiner':
-			abilities = [WORK, CARRY, MOVE];
-			break;
+		/*case 'roleMiner':
+			//abilities = [WORK, CARRY, MOVE];
+			abilities = [CARRY, CARRY, WORK, MOVE];
+			break;*/
 		case 'upgrader':
 			if(level <= 1) {
-				abilities = [WORK, CARRY, MOVE];
+				abilities = [WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 2) {
-				abilities = [WORK, WORK, CARRY, MOVE];
+				abilities = [WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 3) {
-				abilities = [WORK, WORK, CARRY, MOVE, MOVE];
+				abilities = [WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 4) {
+				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 5) {
+				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+			} else
+			if(level <= 6) {
+				abilities = [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 7) {
+				abilities = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 8) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 9) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+			} else
+			if(level >= 10) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+			}
+		break;
+		case 'roleHarvester':
+			if(level <= 1) {
+				abilities = [WORK, CARRY, CARRY, MOVE];
+			} else
+			if(level <= 2) {
+				abilities = [WORK, CARRY, CARRY, MOVE];
+			} else
+			if(level <= 3) {
+				abilities = [WORK, CARRY, CARRY, MOVE];
 			} else
 			if(level <= 4) {
 				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE];
@@ -137,6 +188,38 @@ creepHandler.prototype.new = function(creepType, spawn) {
 				abilities = [WORK, WORK, CARRY, MOVE];
 			} else
 			if(level <= 3) {
+				abilities = [WORK, WORK, CARRY, CARRY, MOVE];
+			} else
+			if(level <= 4) {
+				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 5) {
+				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+			} else
+			if(level <= 6) {
+				abilities = [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 7) {
+				abilities = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 8) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 9) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+			} else
+			if(level >= 10) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+			}
+		break;
+		case 'repairer':
+			if(level <= 1) {
+				abilities = [WORK, CARRY, MOVE];
+			} else
+			if(level <= 2) {
+				abilities = [WORK, WORK, CARRY, MOVE];
+			} else
+			if(level <= 3) {
 				abilities = [WORK, WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 4) {
@@ -163,14 +246,16 @@ creepHandler.prototype.new = function(creepType, spawn) {
 		break;
 		case 'roleCarrier':
 			if(level <= 1) {
-				abilities = [CARRY, MOVE];
+				abilities = [WORK, CARRY, MOVE];
+				//abilities = [CARRY, MOVE];
 			} else
 			if(level <= 2) {
 				//abilities = [CARRY, CARRY, MOVE];
 				abilities = [CARRY, CARRY, WORK, MOVE];
 			} else
 			if(level <= 3) {
-				abilities = [CARRY, CARRY, MOVE, MOVE];
+				//abilities = [CARRY, CARRY, MOVE, MOVE];
+				abilities = [WORK, WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 4) {
 				abilities = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];

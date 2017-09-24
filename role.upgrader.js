@@ -1,9 +1,13 @@
+var depositManager = require('Deposits');
+var creepUtility = require('creepUtility');
 var roleUpgrader = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
         var needsEnergy = false;
         var depleted = false;
+        this.depositManager = new depositManager(creep.room);
+        this.creepUtility = new creepUtility(creep.room);
 
         //figure some stuff out on local storage
         if(creep.carry.energy == 0) {
@@ -58,10 +62,15 @@ var roleUpgrader = {
                         creepsNear[n].transfer(creepsNear[n],RESOURCE_ENERGY,creep.carryCapacity);
                     }
                 }
-                
-            } else */if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                console.log()
+            } else */
+            //console.log('spawnID: ' + this.depositManager.getSpawnDeposit());
+            //this.creepUtility.getEnergy(true,false,creep);
+            var spawn = this.depositManager.getSpawnDeposit();
+            if (creep.withdraw(spawn,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 //console.log('***************upgrader get energy from source****************');
-                creep.moveTo(sources[0]);
+                //reep.moveTo(this.depositManager.getSpawnDeposit());
+                creep.moveTo(spawn);
                 //creep.say('🔄 harvest');
             }
         }

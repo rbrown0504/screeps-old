@@ -31,7 +31,6 @@ function roomMain(room, roomController) {
 
 roomMain.prototype.loadCreeps = function() {
     var creeps = this.room.find(FIND_MY_CREEPS);
-    
     for(var n in creeps) {
         //console.log('creeps: ' + JSON.stringify(creeps[n]));
         var c = this.creepHandler.load(creeps[n]);
@@ -40,12 +39,13 @@ roomMain.prototype.loadCreeps = function() {
             this.creeps.push(c);
         }
     }
-    this.handleResources('roleMiner');
+    this.handleResources('roleHarvester');
     //this.handleBuilders();
+    //this.handleCarriers();
 };
 
 roomMain.prototype.askForReinforcements = function() {
-    console.log(this.room.name + ': ask for reinforcements.');
+    console.log(this.room.name + ' : ask for reinforcements.');
     this.roomController.requestReinforcement(this);
 };
 
@@ -85,6 +85,7 @@ roomMain.prototype.sendReinforcements = function(room) {
 }
 
 roomMain.prototype.populate = function() {
+    //console.log('roomMain.population: ' + this.creepUtility.getTotalPopulation());
     if(this.depositManager.spawns.length == 0 && this.creepUtility.getTotalPopulation() < 10) {
         this.askForReinforcements()
     }
@@ -100,17 +101,20 @@ roomMain.prototype.populate = function() {
             console.log('# defined roles: ' + types.length);
             for(var i = 0; i < types.length; i++) {
                 var ctype = this.creepUtility.getType(types[i]);
-                console.log('roomMain.populate.role: ' + types[i]);
-                console.log('roomMain.goalPercentage: ' + ctype.goalPercentage);
+                //console.log('roomMain.populate.role: ' + types[i]);
+                /*console.log('roomMain.goalPercentage: ' + ctype.goalPercentage);
                 console.log('roomMain.currentPopulation: ' + this.creepUtility.getTotalPopulation());
                 console.log('roomMain.MaxPopulation: ' + this.creepUtility.getMaxPopulation());
                 console.log('roomMain.roleTotal:' + ctype.total);
-                console.log('roomMain.curr %:' + ((ctype.total / this.creepUtility.getMaxPopulation())*100));
+                console.log('roomMain.curr %:' + ((ctype.total / this.creepUtility.getMaxPopulation())*100));*/
+                if ( types[i] !== 'roleMiner') {
+                    if(    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75) {
+                        this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit());
+                        break;
+                    }
 
-                if(    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75) {
-                    this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit());
-                    break;
                 }
+                
                 //console.log('roomMain.populate: ' + this.depositManager.deposits.length);
                 //console.log('roomMain.extensions: ' + ctype.minExtensions);
                 //console.log('roomMain.goalPercentage: ' + ctype.goalPercentage);
@@ -123,6 +127,51 @@ roomMain.prototype.populate = function() {
     }
 
 
+};
+
+roomMain.prototype.handleCarriers = function() {
+    var counter = 0;
+    var builders = [];
+    var carriers = [];
+    for(var i = 0; i < this.creeps.length; i++) {
+        var creep = this.creeps[i];
+        if(creep.remember('role') == 'roleBuilder') {
+            builders.push(creep.creep);
+        }
+        if(creep.remember('role') != 'roleCarrier') {
+            continue;
+        }
+        carriers.push(creep);
+        if(!creep.getDepositFor()) {
+            if(counter%2) {
+                // Construction
+                creep.setDepositFor(1);
+            } else {
+                // Population
+                creep.setDepositFor(2);
+            }
+        }
+
+        counter++;
+    }
+    counter = 0;
+    for(var i = 0; i < carriers.length; i++) {
+        var creep = carriers[i];
+        if(creep.remember('role') != 'roleCarrier') {
+            continue;
+        }
+        if(!builders[counter]) {
+            continue;
+        }
+        var id = creep.remember('target-worker');
+        if(!Game.getObjectById(id)) {
+            creep.remember('target-worker', builders[counter].id);
+        }
+        counter++;
+        if(counter >= builders.length) {
+            counter = 0;
+        }
+    }
 };
 
 
@@ -152,11 +201,11 @@ roomMain.prototype.handleResources = function(type) {
     }
 };
 roomMain.prototype.handleBuilders = function() {
-    var builderStats = this.creepUtility.getType('builder');
+    var builderStats = this.creepUtility.getType('roleBuilder');
     if(this.spawns.length == 0) {
         for(var i = 0; i < this.creeps.length; i++) {
             var creep = this.creeps[i];
-            if(creep.remember('role') != 'builder') {
+            if(creep.remember('role') != 'roleBuilder') {
                 continue;
             }
 
@@ -167,7 +216,7 @@ roomMain.prototype.handleBuilders = function() {
     if(builderStats <= 3) {
         for(var i = 0; i < this.creeps.length; i++) {
             var creep = this.creeps[i];
-            if(creep.remember('role') != 'builder') {
+            if(creep.remember('role') != 'roleBuilder') {
                 continue;
             }
             creep.remember('forceControllerUpgrade', false);
@@ -176,7 +225,7 @@ roomMain.prototype.handleBuilders = function() {
         var c = 0;
         for(var i = 0; i < this.creeps.length; i++) {
             var creep = this.creeps[i];
-            if(creep.remember('role') != 'builder') {
+            if(creep.remember('role') != 'roleBuilder') {
                 continue;
             }
             creep.remember('forceControllerUpgrade', true);

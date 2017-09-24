@@ -9,39 +9,53 @@ function creepUtility(room) {
 	this.population = 0;
 	this.populationLevelMultiplier = 8;
 	this.creepTypes = {
-		roleMiner: {
-			total: 0,
-			goalPercentage: 25,
-			currentPercentage: 0,
-			max: 2,
-			minExtensions: 0
-		},
-		roleCarrier: {
+		roleHarvester: {
 			total: 0,
 			goalPercentage: 40,
 			currentPercentage: 0,
-			max: 10,
+			max: 15,
 			minExtensions: 0
 		},
-		roleBuilder: {
+		/*roleCarrier: {
+			total: 0,
+			goalPercentage: 40,
+			currentPercentage: 0,
+			max: 9,
+			minExtensions: 0
+		},*/
+		/*roleBuilder: {
 			total: 0,
 			goalPercentage: 25,
 			currentPercentage: 0,
 			max: 1,
 			minExtensions: 0
-		},
+		},*/
 		upgrader: {
 			total: 0,
-			goalPercentage: 25,
+			goalPercentage: 40,
 			currentPercentage: 0,
-			max: 4,
+			max: 12,
 			minExtensions: 0
 		},
 		builder: {
 			total: 0,
-			goalPercentage: 25,
+			goalPercentage: 10,
 			currentPercentage: 0,
 			max: 5,
+			minExtensions: 0
+		},
+		repairer: {
+			total: 0,
+			goalPercentage: 10,
+			currentPercentage: 0,
+			max: 1,
+			minExtensions: 0
+		},
+		roleMiner: {
+			total: 0,
+			goalPercentage: 0,
+			currentPercentage: 0,
+			max: 0,
 			minExtensions: 0
 		}
 	};	
@@ -61,6 +75,10 @@ function creepUtility(room) {
 	}
 
 }
+
+creepUtility.prototype.getRoom = function() {
+	return this.room;
+};
 
 creepUtility.prototype.getRolePopulation = function(roleName) {
 	var population = _.filter(Game.creeps, (creep) => creep.memory.role == roleName);
@@ -137,6 +155,17 @@ creepUtility.prototype.getSources = function(room) {
 	);
 };
 
+//resources
+creepUtility.prototype.getMiners = function(roleName) {
+
+	return this.cache.remember(
+		'roleMiners',
+		function() {
+			return _.filter(Game.creeps, (creep) => creep.memory.role == 'roleMiner');
+		}.bind(this)
+	);
+};
+
 creepUtility.prototype.getAvailableResource = function() {
 	// Some kind of unit counter per resource (with Population)
 	var srcs = this.getSources();
@@ -145,9 +174,50 @@ creepUtility.prototype.getAvailableResource = function() {
 	return srcs[srcIndex];
 };
 
+creepUtility.prototype.getTargetMiner = function(role) {
+	var mnrs = this.getMiners();
+	var mnrIndex = Math.floor(Math.random()*mnrs.length);
+
+	return mnrs[mnrIndex];
+};
+
 creepUtility.prototype.getResourceById = function(id) {
 	return Game.getObjectById(id);
 };
+
+creepUtility.prototype.getEnergy =
+    function (useContainer, useSource, creep) {
+        /** @type {StructureContainer} */
+        let container;
+        // if the Creep should look for containers
+        if (useContainer) {
+            // find closest container
+            container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: s => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) &&
+                             s.store[RESOURCE_ENERGY] > 0
+            });
+            // if one was found
+            if (container !== undefined) {
+                // try to withdraw energy, if the container is not in range
+                console.log('get energy!@#!@#!@#!@#!@#!@#@!#!@#@!#');
+                if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards it
+                    creep.moveTo(container);
+                }
+            }
+        }
+        // if no container was found and the Creep should look for Sources
+        if (container == undefined && useSource) {
+            // find closest source
+            var source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+
+            // try to harvest energy, if the source is not in range
+            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                // move towards it
+                creep.moveTo(source);
+            }
+        }
+    };
 
 module.exports = creepUtility;
 
