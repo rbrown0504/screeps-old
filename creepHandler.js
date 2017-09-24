@@ -4,6 +4,7 @@ var CreepBase = require('CreepBase');
 var roleBuilder = require('role.builder');
 var roleCarrier = require('roleCarrier');
 var roleHarvester = require('roleHarvester');
+var roleLDHarvester = require('roleLDHarvester');
 var roleUpgrader = require('role.upgrader');
 var roleRepairer = require('role.repairer');
 var utility = require('utility');
@@ -28,6 +29,10 @@ creepHandler.prototype.load = function(creep) {
 		break;
 		case 'roleHarvester':
 			loadedCreep = new roleHarvester(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
+		break;
+		case 'roleLDHarvester':
+			loadedCreep = new roleLDHarvester(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
+			
 		break;
 		case 'upgrader':
 			loadedCreep = roleUpgrader.run(creep);;
@@ -148,6 +153,38 @@ creepHandler.prototype.new = function(creepType, spawn) {
 				abilities = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
 			}
 		break;
+		case 'roleLDHarvester':
+			if(level <= 1) {
+				abilities = [WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 2) {
+				abilities = [WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 3) {
+				abilities = [WORK, CARRY, CARRY, MOVE];
+			} else
+			if(level <= 4) {
+				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 5) {
+				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+			} else
+			if(level <= 6) {
+				abilities = [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 7) {
+				abilities = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 8) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+			} else
+			if(level <= 9) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+			} else
+			if(level >= 10) {
+				abilities = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+			}
+		break;
 		case 'roleBuilder':
 			if(level <= 1) {
 				abilities = [WORK, CARRY, MOVE];
@@ -185,7 +222,7 @@ creepHandler.prototype.new = function(creepType, spawn) {
 				abilities = [WORK, CARRY, MOVE];
 			} else
 			if(level <= 2) {
-				abilities = [WORK, WORK, CARRY, MOVE];
+				abilities = [WORK, CARRY, CARRY, MOVE];
 			} else
 			if(level <= 3) {
 				abilities = [WORK, WORK, CARRY, CARRY, MOVE];

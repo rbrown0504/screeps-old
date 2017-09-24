@@ -30,6 +30,13 @@ function creepUtility(room) {
 			max: 1,
 			minExtensions: 0
 		},*/
+		roleLDHarvester: {
+			total: 0,
+			goalPercentage: 10,
+			currentPercentage: 0,
+			max: 10,
+			minExtensions: 0
+		},
 		upgrader: {
 			total: 0,
 			goalPercentage: 40,
