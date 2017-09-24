@@ -38,7 +38,8 @@ roleHarvester.prototype.init = function() {
 		//this.forget('sourceOverride');
 	}*/
 
-	if(!this.remember('source')) {
+	if(this.remember('source') === undefined) {
+		console.log('going to remember source');
 		var src = this.resourceManager.getAvailableResource();
 		this.remember('source', src.id);
 	} else {

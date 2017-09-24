@@ -35,15 +35,15 @@ creepHandler.prototype.load = function(creep) {
 			
 		break;
 		case 'upgrader':
-			loadedCreep = roleUpgrader.run(creep);;
+			loadedCreep = roleUpgrader.run(creep);
 		break;
 
 		case 'builder':
-			loadedCreep = roleBuilder.run(creep);;
+			loadedCreep = roleBuilder.run(creep);
 		break;
 
 		case 'repairer':
-			loadedCreep = roleRepairer.run(creep);;
+			loadedCreep = roleRepairer.run(creep);
 		break;
 
 		case 'roleCarrier':
@@ -58,7 +58,7 @@ creepHandler.prototype.load = function(creep) {
 		//console.log('making it to false***************************');
 		return false;
 	}
-
+	//console.log(JSON.stringify(loadedCreep));
 	utility.extend(loadedCreep, CreepBase);
 	loadedCreep.init();
 
