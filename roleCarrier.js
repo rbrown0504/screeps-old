@@ -24,7 +24,8 @@ function roleCarrier(creep, depositManager, resourceManager, constructionsManage
 
 roleCarrier.prototype.init = function() {
 	this.remember('role', 'roleCarrier');
-	var targetId = this.remember('target-MinerHarvest');			
+	//this.creep.suicide();
+	var targetId = this.remember('target-MinerHarvest');
 	var lastFillUp = this.remember('last-FillUp');
 	var timestamp = new Date().getTime();			
 	var targetFound = false;
@@ -52,22 +53,22 @@ roleCarrier.prototype.init = function() {
   			this.remember('last-FillUp', timestamp);
   		}
 	}
-	console.log('target-HarvestFound: ' + targetFound);
-	console.log('target-HarvestisFound: ' + isFound);
+	//console.log('target-HarvestFound: ' + targetFound);
+	//console.log('target-HarvestisFound: ' + isFound);
 	if (!targetFound) {
-		console.log('forgetting target');
+		//console.log('forgetting target');
 		this.forget('target-MinerHarvest');
 	}
 
-
+	var src = this.creepUtility.getAvailableResource();
 	this.depositFor = this.remember('depositFor') || 2;
-	if(!this.remember('source')) {
-		var src = this.resourceManager.getAvailableResource();
+	if(this.remember('source') == undefined) {
+		//var src = this.creepUtility.getAvailableResource();
 		this.remember('source', src.id);
 	} else {
-		this.resource = this.resourceManager.getResourceById(this.remember('source'));
+		this.resource = this.creepUtility.getResourceById(this.remember('source'));
 	}
-	console.log(this.resource);
+	//console.log(this.resource);
 	if(this.depositFor == DEPOSIT_FOR.CONSTRUCTION) {
 		//this.creep.say('w');
 	}
@@ -133,13 +134,13 @@ roleCarrier.prototype.act = function() {
 
     if (this.creep.memory.working) {
     	var avoidArea = this.getAvoidedArea();
-    	var targetDropped = this.creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {avoid: avoidArea});
+    	//var targetDropped = this.creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {avoid: avoidArea});
     	//console.log('targetDropped:' + targetDropped);
     	//console.log('******************************************************************************');
-    	if (targetDropped != null) {
+    	/*if (targetDropped != null) {
     		//console.log('********************target dropped!!!!!!!**********************************************************');
     		this.pickupEnergy();
-    	}
+    	}*/
     	//if there's nothing to pick up, go and get a full source
     	//this.harvestEnergy();
     	//also can have it maintain builders energy from miners here
@@ -154,11 +155,12 @@ roleCarrier.prototype.act = function() {
     }
     if (this.creep.memory.carry) {
     	//console.log('carrierHarvest_deposit');
-    	if (this.creep.carry.energy == this.creep.carryCapacity) {
+    	this.harvestCreep();	
+    	/*if (this.creep.carry.energy == this.creep.carryCapacity) {
     		this.depositEnergy();
     	} else {
-    		this.harvestCreep();	
-    	}
+    		
+    	}*/
     	//console.log('carrierDeposit_done');
     }
 
@@ -224,7 +226,7 @@ roleCarrier.prototype.getDeposit = function() {
 			}
 
 			if(!deposit) {
-				console.log(this.creep);
+				//console.log(this.creep);
 				deposit = this.depositManager.getClosestEmptyDeposit(this.creep);
 				this.remember('closest-deposit', deposit.id);
 			}
@@ -248,15 +250,12 @@ roleCarrier.prototype.pickupEnergy = function() {
 	}
 
 	var target = this.creep.pos.findInRange(FIND_DROPPED_RESOURCES,100);
-	//console.log('***********************target: ' + target);
 	if(target.length) {
-		//console.log('roleCarrier.pickupEnergy.pickup');
 		this.creep.moveTo(target[0]);
 	    this.creep.pickup(target[0]);
 	}
 };
 roleCarrier.prototype.harvestEnergy = function() {
-	//this.creep.moveTo(0,0);
 	var avoidArea = this.getAvoidedArea();
 	this.creep.moveTo(this.resource, {avoid: avoidArea});
 	if(this.creep.pos.inRangeTo(this.resource, 3)) {
@@ -269,85 +268,26 @@ roleCarrier.prototype.harvestEnergy = function() {
 }
 
 roleCarrier.prototype.harvestCreep = function() {
-	//console.log('roleCarrier.harvestCreep');
-	var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS,50);
 	if (this.creep.memory.working) {
+		var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS,5);
+		this.creep.moveTo(this.creepUtility.getAvailableResource(this.remember('source')));
 		if(creepsNear.length){
-			var targetId = this.remember('target-MinerHarvest');			
-
-			if (targetId !== undefined) {
-				console.log('I have a target miner, my name is: ' + this.creep.name + ', my target is: ' + targetId);
-				for(var n in creepsNear){
-					
-					if(creepsNear[n].memory.role === 'roleMiner' && (creepsNear[n].energy != 0) && ( (creepsNear[n].carry.energy == creepsNear[n].carryCapacity) && this.remember('target-MinerHarvest') == creepsNear[n].id) ){
-						this.creep.moveTo(creepsNear[n]);
-						console.log('harvesting from miner');
-						creepsNear[n].transfer(this.creep,RESOURCE_ENERGY);
-						this.remember('target-MinerHarvest',creepsNear[n].id);
-					} else {
-						console.log('harvesting energy');
-						this.harvestEnergy();
-					}
+			for(var n in creepsNear){
+				if( (creepsNear[n].memory.role === 'roleHarvester' || creepsNear[n].memory.role === 'roleLDHarvester') && (creepsNear[n].energy != 0) && ( (creepsNear[n].carry.energy < creepsNear[n].carryCapacity)  ) ){
+					this.creep.moveTo(creepsNear[n]);
+					creepsNear[n].transfer(this.creep,RESOURCE_ENERGY);
+					this.remember('target-MinerHarvest',creepsNear[n].id);
 				}
-			} else {
-				//switch from last and set new target
-				console.log('I DO NOT have a target miner');
-				for(var n in creepsNear){
-					if(  creepsNear[n].memory.role === 'roleMiner' && (creepsNear[n].energy != 0) && (this.creep.carry.energy< this.creep.carryCapacity) && (creepsNear[n].id != this.remember('last-MinerHarvest'))  ){
-						//console.log('going to new miner');
-						this.creep.moveTo(creepsNear[n]);
-						creepsNear[n].transfer(this.creep,RESOURCE_ENERGY);
-						this.remember('target-MinerHarvest',creepsNear[n].id);
-					} else {
-						this.harvestEnergy();
-					}
-				}
-			}
-			/*if (targetId != null) {
-
-				console.log('asdfasdfatarget-minerHarvest: ' + this.remember('target-MinerHarvest'));
-				console.log('tadsfadsf	hisCreepId: ' + creepsNear[n].id);
-
-				for(var n in creepsNear){
-					
-					if(creepsNear[n].memory.role === 'roleMiner' && (creepsNear[n].energy != 0) && (this.creep.carry.energy< this.creep.carryCapacity && this.remember('target-MinerHarvest') == creepsNear[n].id) ){
-						//console.log('going to target miner');
-
-						this.creep.moveTo(creepsNear[n]);
-						creepsNear[n].transfer(this.creep,RESOURCE_ENERGY);
-						this.remember('target-MinerHarvest',creepsNear[n].id);
-					} else {
-						this.harvestEnergy();
-					}
-				}
-			} else {
-				//switch from last and set new target
-				for(var n in creepsNear){
-					if(  creepsNear[n].memory.role === 'roleMiner' && (creepsNear[n].energy != 0) && (this.creep.carry.energy< this.creep.carryCapacity) && (creepsNear[n].id != this.remember('last-MinerHarvest'))  ){
-						//console.log('going to new miner');
-						this.creep.moveTo(creepsNear[n]);
-						creepsNear[n].transfer(this.creep,RESOURCE_ENERGY);
-						//this.remember('target-MinerHarvest',creepsNear[n].id);
-					} else {
-						this.harvestEnergy();
-					}
-				}
-			}*/
-			
+			}			
 		}
 	}
 	if (this.creep.memory.carry) {
-		//var assignedSet = new set();
+		var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS,50);
 		if(creepsNear.length){
 			for(var n in creepsNear){
-				//console.log('roleCarrier.harvestCreep.roleCheck');
-				if( (creepsNear[n].memory.role === 'builder' || creepsNear[n].memory.role === 'upgrader' || creepsNear[n].memory.role === 'roleBuilder') && (creepsNear[n].carry.energy < creepsNear[n].carryCapacity) ) {
-	            	//console.log('carrier gives to creep who needs it');
-	            	//console.log('creep: ' + this.creep + ' to ' + creepsNear[n]);
-	            	//console.log(creepsNear.pos);
+				if( (creepsNear[n].memory.role === 'builder' || creepsNear[n].memory.role === 'upgrader' || creepsNear[n].memory.role === 'repairer' || creepsNear[n].memory.role === 'roleBuilder') && (creepsNear[n].carry.energy < creepsNear[n].carryCapacity) ) {
 					this.creep.moveTo(creepsNear[n]);				
 	                this.creep.transfer(creepsNear[n],RESOURCE_ENERGY);
-
 				}
 			}
 		}
