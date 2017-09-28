@@ -6,6 +6,10 @@ module.exports = {
     /** @param {Creep} creep */
     run: function(creep) {
     	this.depositManager = new depositManager(creep.room);
+        this.creep = creep;
+        if (creep.memory.working === undefined) {
+            creep.memory.working=true;
+        }
         // if creep is trying to repair something but has no energy left
         if (creep.memory.working == true && creep.carry.energy == 0) {
             // switch state
