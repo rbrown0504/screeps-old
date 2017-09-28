@@ -42,10 +42,15 @@ roleLDHarvester.prototype.init = function() {
 	
 
 	if (this.remember('target') == undefined) {		
+		//RIGHT
+		this.remember('target','W4N8');
 		//LEFT
-		this.remember('target','W6N8');
+		//this.remember('target','W6N8');
 		//UP
 		//this.remember('target','W5N9');
+		//DOWN
+		//this.remember('target','W5N7');
+
 	}	
 
 	var lastFillUp = this.remember('last-FillUp');
@@ -107,7 +112,7 @@ roleLDHarvester.prototype.act = function() {
     }
 
     if (this.creep.memory.working) {
-    	this.harvestEnergy();
+    	this.harvestEnergy();	
     }
     if (this.creep.memory.carry) {
     	this.depositEnergy();
@@ -180,7 +185,7 @@ roleLDHarvester.prototype.getDeposit = function() {
 roleLDHarvester.prototype.harvestEnergy = function() {	
 	if (this.creep.room.name == this.creep.memory.target) {
         // find source
-        console.log('harvesting in another room!!!!');
+        //console.log('harvesting in another room!!!!');
         var avoidArea = this.getAvoidedArea();
 		if (this.creep.harvest(this.resource) == ERR_NOT_IN_RANGE) {
 			this.creep.moveTo(this.resource);
