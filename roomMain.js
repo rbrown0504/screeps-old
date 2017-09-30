@@ -113,7 +113,12 @@ roomMain.prototype.populate = function() {
                     if (types[i] == 'roleHarvester') {
                         //only spawn harvesters if miners aren't already occupying sources
                         var sources = this.creepUtility.getSources();
-                        if (sources.length == 1) {
+                        if (spawn.memory.harvesterOverride) {
+                            //spawn harvesters if the spawn memory has override
+                            console.log('HARVESTER OVERRIDE ENABLED');
+                            this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
+                            break;
+                        } else if (sources.length == 1) {
                             //only spawn harvesters if miners aren't already occupying sources
                             var minerTargets = _.sum(Game.creeps, (c) => c.memory.role == 'roleMiner' && c.memory.source == spawn.memory.container);
                             if (minerTargets > 0) continue;
@@ -132,13 +137,17 @@ roomMain.prototype.populate = function() {
                                 break;
                             } else if (spawn.memory.container == undefined){
                                 //if no container defined spawn harvester
-                                this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
-                                break;
+                                if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
+                                    this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
+                                    break;
+                                }
                             }
                         } else {
                             console.log('all else');
-                            this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
-                            break;
+                            if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
+                                this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
+                                break;
+                            }
                         }
                     } else if (types[i] == 'roleMiner') {
                         //only create miner when there is at least one container memory entry in a spawn
@@ -167,6 +176,17 @@ roomMain.prototype.populate = function() {
                                 break;
                             }
                         }
+                    } else if (types[i] == 'roleCarrier') {
+                        //only create carriers if there are miners
+                        //carriers carry energy from mining containers, will otherwise do nothing to transfer energy
+                        var minerTargets = _.sum(Game.creeps, (c) => c.memory.role == 'roleMiner');
+                        if (minerTargets > 0) {
+                            if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
+                                this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
+                                break;
+                            }
+                        }
+
                     } else {
                         //console.log('everything else');
                         if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
