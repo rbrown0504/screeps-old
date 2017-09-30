@@ -35,6 +35,20 @@ module.exports.loop = function () {
     var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleClaimer');
 
 
+    /**/
+    // find all towers
+    var towers = _.filter(Game.structures, s => s.structureType == STRUCTURE_TOWER);
+    // for each tower
+    for (let tower of towers) {
+        // run tower logic
+        var target = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        // if one is found...
+        if (target != undefined) {
+            // ...FIRE!
+            tower.attack(target);
+        }
+    }
+
     for(var n in rooms) {
         var room = rooms[n];
         //console.log(JSON.stringify(room));
