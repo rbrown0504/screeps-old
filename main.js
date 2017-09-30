@@ -21,9 +21,13 @@ module.exports.loop = function () {
     };
     var rooms = RoomController.getRoomControllers();
     //console.log(JSON.stringify(rooms));
+    var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleMiner');
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleHarvester');
     var LDharvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleLDHarvester');
-    //var LDharvestersW5N8 = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleLDHarvester' && creep.room='W5N8');
+    var LDharvestersW4N8 = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == 'W4N8');
+    var LDharvestersW5N7 = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == 'W5N7');
+    var LDharvestersW5N9 = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == 'W5N9');
+    var LDharvestersW6N8 = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == 'W6N8');
     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
     var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleMiner');
@@ -34,9 +38,11 @@ module.exports.loop = function () {
     for(var n in rooms) {
         var room = rooms[n];
         //console.log(JSON.stringify(room));
-
+        //room.loadSpawns();
         room.loadCreeps();
         room.populate();
+        //see if there are any containers in the room
+        //if so, set the miner target        
 
         console.log('**Room Name**: ' + room.room.name + 
             ' | Population: ' + room.creepUtility.getTotalPopulation() + '/' + room.creepUtility.getMaxPopulation() +
@@ -46,11 +52,12 @@ module.exports.loop = function () {
             ' | LDHARVESTERS: ' + room.creepUtility.getType('roleLDHarvester').total + 
             ' | UPGRADERS: ' + room.creepUtility.getType('upgrader').total + 
             ' | BUILDERS: ' + room.creepUtility.getType('builder').total +
-            //' | MINERS_NEW: ' + room.creepUtility.getRolePopulation('roleMiner') + 
+            ' | MINERS: ' + room.creepUtility.getType('roleMiner').total +
+            ' | CARRIERS: ' + room.creepUtility.getType('roleCarrier').total //+
             //' | CARRIERS_NEW: ' + room.creepUtility.getRolePopulation('roleCarrier') + 
-            ' | BUILDERS_NEW: ' + room.creepUtility.getRolePopulation('builder')
+            //' | BUILDERS_NEW: ' + room.creepUtility.getRolePopulation('builder')
             );
-        if (room.room.name == 'W5N9') {
+        /*if (room.room.name == 'W5N9') {
             if (room.creepUtility.getType('roleLDHarvester').total +10 < 25) {
                 var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE], undefined, {role: 'roleLDHarvester',target:'W5N9'});
                 console.log('Spawning new LDharvester W5N9: ' + newName);
@@ -70,7 +77,7 @@ module.exports.loop = function () {
                 var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE], undefined, {role: 'roleLDHarvester',target:'W5N7'});
                 console.log('Spawning new LDharvester W5N7: ' + newName);
             }
-        }
+        }*/
 
 
         /*console.log(
@@ -90,18 +97,32 @@ module.exports.loop = function () {
         );*/
     };
 
+    /*if (LDharvestersW4N8 < 10) {
+        var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE], undefined, {role: 'roleLDHarvester',target:'W4N8'});
+        console.log('Spawning new LDharvester W4N8: ' + newName);
+    } else if (LDharvestersW5N9 < 10) {
+        var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE], undefined, {role: 'roleLDHarvester',target:'W5N9'});
+        console.log('Spawning new LDharvester W5N9: ' + newName);
+    } else  if (LDharvestersW5N7 < 10) {
+        var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE], undefined, {role: 'roleLDHarvester',target:'W5N7'});
+        console.log('Spawning new LDharvester W5N7: ' + newName);
+    } else if (LDharvestersW6N8 < 10) {
+        var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE], undefined, {role: 'roleLDHarvester',target:'W6N8'});
+        console.log('Spawning new LDharvester W6N8: ' + newName);
+    }*/
+
     
 
-    if(harvesters.length < 8) {
+    /*if(harvesters.length < 6) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,MOVE], undefined, {role: 'roleHarvester'});
         console.log('Spawning new harvester: ' + newName);
-    }/* else if(LDharvesters.length < 15) {
+    }*//* else if(LDharvesters.length < 15) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,MOVE], undefined, {role: 'roleLDHarvester'});
         console.log('Spawning new LDharvester: ' + newName);
-    }*/ else if(claimers.length < 1) {
+    }*/ /*else if(claimers.length < 1) {
         var newName = Game.spawns['Spawn1'].createCreep([CLAIM, MOVE], undefined, {role: 'roleClaimer'});
         console.log('Spawning new Claimer: ' + newName);
-    } /*else if(upgraders.length < 10) {
+    }*/ /*else if(upgraders.length < 10) {
         var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE,MOVE], undefined, {role: 'upgrader'});
         console.log('Spawning new upgrader: ' + newName);
     }*/
