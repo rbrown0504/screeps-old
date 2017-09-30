@@ -55,6 +55,7 @@ module.exports.loop = function () {
         //room.loadSpawns();
         room.loadCreeps();
         room.populate();
+
         //see if there are any containers in the room
         //if so, set the miner target        
 
@@ -67,9 +68,9 @@ module.exports.loop = function () {
             ' | UPGRADERS: ' + room.creepUtility.getType('upgrader').total + 
             ' | BUILDERS: ' + room.creepUtility.getType('builder').total +
             ' | MINERS: ' + room.creepUtility.getType('roleMiner').total +
-            ' | CARRIERS: ' + room.creepUtility.getType('roleCarrier').total //+
+            ' | CARRIERS: ' + room.creepUtility.getType('roleCarrier').total +
             //' | CARRIERS_NEW: ' + room.creepUtility.getRolePopulation('roleCarrier') + 
-            //' | BUILDERS_NEW: ' + room.creepUtility.getRolePopulation('builder')
+            ' | BUILDERS_NEW: ' + room.creepUtility.getRolePopulation('roleBuilder')
             );
         /*if (room.room.name == 'W5N9') {
             if (room.creepUtility.getType('roleLDHarvester').total +10 < 25) {

@@ -7,6 +7,7 @@ var roleHarvester = require('roleHarvester');
 var roleLDHarvester = require('roleLDHarvester');
 var roleUpgrader = require('role.upgrader');
 var roleRepairer = require('role.repairer');
+var roleBuilder1 = require('roleBuilder');
 var utility = require('utility');
 
 function creepHandler(creepUtility, depositManager, constructionsManager) {
@@ -25,7 +26,7 @@ creepHandler.prototype.load = function(creep) {
 	switch(role) {
 
 		case 'roleBuilder':
-			loadedCreep = new roleBuilder(creep, this.depositManager, this.constructionsManager);
+			loadedCreep = new roleBuilder1(creep, this.depositManager, this.constructionsManager, this.creepUtility);
 		break;
 		case 'roleHarvester':
 			loadedCreep = new roleHarvester(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
