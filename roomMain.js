@@ -39,7 +39,10 @@ roomMain.prototype.loadCreeps = function() {
             this.creeps.push(c);
         }
     }
-    this.handleResources('roleHarvester');
+
+    //this.handleResources('roleMiner');
+    //this.handleResources('roleHarvester');
+    //this.handleResources('roleLDHarvester');
     //this.handleBuilders();
     //this.handleCarriers();
 };
@@ -87,16 +90,21 @@ roomMain.prototype.sendReinforcements = function(room) {
 roomMain.prototype.populate = function() {
     //console.log('roomMain.population: ' + this.creepUtility.getTotalPopulation());
     if(this.depositManager.spawns.length == 0 && this.creepUtility.getTotalPopulation() < 10) {
-        this.askForReinforcements()
+        //his.askForReinforcements()
     }
 
     for(var i = 0; i < this.depositManager.spawns.length; i++) {
         var spawn = this.depositManager.spawns[i];
         if(spawn.spawning) {
+            console.log('spawning');
+
             continue;
         }
 
-        if((this.depositManager.energy() / this.depositManager.energyCapacity()) > 0.2) {
+        console.log(this.depositManager.energy());
+        console.log(this.depositManager.energyCapacity());
+
+        //if((this.depositManager.energy() / this.depositManager.energyCapacity()) > 0.2) {
             var types = this.creepUtility.getTypes()
             console.log('# defined roles: ' + types.length);
             for(var i = 0; i < types.length; i++) {
@@ -107,7 +115,7 @@ roomMain.prototype.populate = function() {
                 console.log('roomMain.MaxPopulation: ' + this.creepUtility.getMaxPopulation());
                 console.log('roomMain.roleTotal:' + ctype.total);
                 console.log('roomMain.curr %:' + ((ctype.total / this.creepUtility.getMaxPopulation())*100));*/
-                if (types[i] !== 'roleSoldier'  && types[i] !== 'roleClaimer' && types[i] !== 'roleLDHarvester') {
+                if (types[i] !== 'roleSoldier'  && types[i] !== 'roleClaimer') {
                    // console.log('asdfasdfasdfvrtebsvdds else');
                     //i use containers with a miner that doesn't move. save container detail in game when ready
                     if (types[i] == 'roleHarvester') {
@@ -133,8 +141,10 @@ roomMain.prototype.populate = function() {
                             console.log(minerTargets1);*/
                             if (minerTargets == 0 && minerTargets1 == 0 && spawn.memory.container !== undefined) {
                                 //if miners die, spawn harvesters
-                                this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
-                                break;
+                                if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
+                                    this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
+                                    break;
+                                }
                             } else if (spawn.memory.container == undefined){
                                 //if no container defined spawn harvester
                                 if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
@@ -149,10 +159,27 @@ roomMain.prototype.populate = function() {
                                 break;
                             }
                         }
+                    } else if (types[i] == 'roleCarrier') {
+                        //only create carriers if there are miners
+                        //carriers carry energy from mining containers, will otherwise do nothing to transfer energy
+                        var minerTargets = _.sum(Game.creeps, (c) => c.memory.role == 'roleMiner');
+                        if (minerTargets > 0) {
+                            if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
+                                this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
+                                break;
+                            }
+                        } else {
+                            if (spawn.memory.container !== undefined) {
+                                this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
+                                break;
+                            }
+                        }
                     } else if (types[i] == 'roleMiner') {
+                        //console.log('miner');
                         //only create miner when there is at least one container memory entry in a spawn
                         //the container id stored in spawn memory is the closest source id to the container
-                        if (spawn.memory.container == undefined) continue;
+                        //console.log('@#$%^&*()(*&^%$#@!@$%^&*()(*&^%extensions: ' + this.structures.length + 'min extensions ' + ctype.minExtensions);
+                        if (spawn.memory.container == undefined || this.structures.length < ctype.minExtensions) continue;
                         //set source for each new creep created, there is one miner per container at any given time
                         if (spawn.memory.container !== undefined) {
                             var minerTargets = _.sum(Game.creeps, (c) => c.memory.role == 'roleMiner' && c.memory.source == spawn.memory.container);
@@ -176,17 +203,16 @@ roomMain.prototype.populate = function() {
                                 break;
                             }
                         }
-                    } else if (types[i] == 'roleCarrier') {
-                        //only create carriers if there are miners
-                        //carriers carry energy from mining containers, will otherwise do nothing to transfer energy
-                        var minerTargets = _.sum(Game.creeps, (c) => c.memory.role == 'roleMiner');
-                        if (minerTargets > 0) {
-                            if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
-                                this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined);
-                                break;
-                            }
-                        }
+                    } else if (types[i] == 'roleLDHarvester') {
+                        var LDharvestersN = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == spawn.memory.harvestNorth);
+                        var LDharvestersS = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == spawn.memory.harvestSouth);
+                        var LDharvestersE = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == spawn.memory.harvestEast);
+                        var LDharvestersW = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == spawn.memory.harvestWest);
 
+                        if (spawn.memory.harvestWest !== undefined && LDharvestersW < 10) {
+                            this.creepHandler.new(types[i], this.depositManager.getSpawnDeposit(),undefined,spawn.memory.harvestWest);
+                            break;
+                        }
                     } else {
                         //console.log('everything else');
                         if (    (ctype.goalPercentage > ((ctype.total / this.creepUtility.getMaxPopulation())*100)) && (ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75 ) {
@@ -203,7 +229,7 @@ roomMain.prototype.populate = function() {
                 /*if(this.depositManager.deposits.length > ctype.minExtensions) {
                     
                 }*/
-            }
+            //}
         }
     }
 

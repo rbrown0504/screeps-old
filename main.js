@@ -30,10 +30,13 @@ module.exports.loop = function () {
     var LDharvestersW6N8 = _.sum(Game.creeps, (c) => c.memory.role == 'roleLDHarvester' && c.memory.target == 'W6N8');
     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-    var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleMiner');
     var carriers = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleCarrier');
     var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'roleClaimer');
 
+    /*console.log('ldharvesterW4N8:' + LDharvestersW4N8);
+    console.log('ldharvesterW5N7:' + LDharvestersW5N7);
+    console.log('ldharvesterW5N9:' + LDharvestersW5N9);
+    console.log('ldharvesterW6N8:' + LDharvestersW6N8);*/
 
     /**/
     // find all towers
@@ -69,6 +72,7 @@ module.exports.loop = function () {
             ' | BUILDERS: ' + room.creepUtility.getType('builder').total +
             ' | MINERS: ' + room.creepUtility.getType('roleMiner').total +
             ' | CARRIERS: ' + room.creepUtility.getType('roleCarrier').total +
+            ' | REPAIRERS: ' + room.creepUtility.getType('repairer').total +
             //' | CARRIERS_NEW: ' + room.creepUtility.getRolePopulation('roleCarrier') + 
             ' | BUILDERS_NEW: ' + room.creepUtility.getRolePopulation('roleBuilder')
             );

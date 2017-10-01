@@ -1,12 +1,14 @@
 /*Credit to for original for this foundation: screeps-ai https://github.com/beije/screeps-ai, any additional modifications made by myself.*/
 var CreepBase = require('CreepBase');
-//var roleMiner = require('roleMiner');
+var roleMiner = require('roleMiner');
 var roleBuilder = require('role.builder');
 var roleCarrier = require('roleCarrier');
 var roleHarvester = require('roleHarvester');
 var roleLDHarvester = require('roleLDHarvester');
 var roleUpgrader = require('role.upgrader');
 var roleRepairer = require('role.repairer');
+var roleClaimer = require('roleClaimer');
+var roleSoldier = require('roleSoldier');
 var roleBuilder1 = require('roleBuilder');
 var utility = require('utility');
 
@@ -33,20 +35,28 @@ creepHandler.prototype.load = function(creep) {
 		break;
 		case 'roleLDHarvester':
 			loadedCreep = new roleLDHarvester(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
-			
+		break;
+		/*case 'roleClaimer':
+			loadedCreep = new roleClaimer(creep, this.creepUtility);
+		break;*/
+		case 'roleMiner':
+			loadedCreep = new roleMiner(creep, this.creepUtility);
 		break;
 		case 'upgrader':
 			loadedCreep = roleUpgrader.run(creep);
 		break;
-
 		case 'builder':
 			loadedCreep = roleBuilder.run(creep);
 		break;
-
 		case 'repairer':
 			loadedCreep = roleRepairer.run(creep);
 		break;
-
+		case 'roleSoldier':
+			loadedCreep = new roleSoldier(creep);
+		break;
+		case 'roleShooter':
+			loadedCreep = new roleShooter(creep);
+		break;
 		case 'roleCarrier':
 			loadedCreep = new roleCarrier(creep, this.depositManager, this.creepUtility, this.constructionsManager, this.creepUtility);
 		break;
@@ -66,7 +76,7 @@ creepHandler.prototype.load = function(creep) {
 	return loadedCreep;
 };
 
-creepHandler.prototype.new = function(creepType, spawn) {
+creepHandler.prototype.new = function(creepType, spawn, sourceOverride, targetOverride) {
 	var abilities = [];
 	var id = new Date().getTime();
 	var creepLevel = this.creepUtility.getTotalPopulation() / this.creepUtility.populationLevelMultiplier;
@@ -86,10 +96,10 @@ creepHandler.prototype.new = function(creepType, spawn) {
 	// HEAL           200
 
 	switch(creepType) {
-		/*case 'roleMiner':
+		case 'roleMiner':
 			//abilities = [WORK, CARRY, MOVE];
-			abilities = [CARRY, CARRY, WORK, MOVE];
-			break;*/
+			abilities = [WORK, WORK, WORK, WORK, WORK, MOVE];
+			break;
 		case 'upgrader':
 			if(level <= 1) {
 				abilities = [WORK, CARRY, MOVE, MOVE];
@@ -98,7 +108,7 @@ creepHandler.prototype.new = function(creepType, spawn) {
 				abilities = [WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 3) {
-				abilities = [WORK, CARRY, MOVE, MOVE];
+				abilities = [WORK, WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 4) {
 				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE];
@@ -130,7 +140,7 @@ creepHandler.prototype.new = function(creepType, spawn) {
 				abilities = [WORK, CARRY, CARRY, MOVE];
 			} else
 			if(level <= 3) {
-				abilities = [WORK, CARRY, CARRY, MOVE];
+				abilities = [WORK, WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 4) {
 				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE];
@@ -162,13 +172,13 @@ creepHandler.prototype.new = function(creepType, spawn) {
 				abilities = [WORK, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 3) {
-				abilities = [WORK, CARRY, CARRY, MOVE];
+				abilities = [WORK, CARRY, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 4) {
-				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE];
+				abilities = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
 			} else
 			if(level <= 5) {
-				abilities = [WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+				abilities = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
 			} else
 			if(level <= 6) {
 				abilities = [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE];
@@ -375,6 +385,9 @@ creepHandler.prototype.new = function(creepType, spawn) {
 		case 'roleHealer':
 			abilities = [MOVE, MOVE, MOVE, HEAL, MOVE];
 		break;
+		case 'roleClaimer':
+			abilities = [CLAIM, MOVE];
+		break;
 	}
 
 	var canBuild = spawn.canCreateCreep(
@@ -391,7 +404,15 @@ creepHandler.prototype.new = function(creepType, spawn) {
 	}
 
 	console.log('Spawn level ' + level + ' ' + creepType + '(' + creepLevel + '/' + resourceLevel + ')');
-	spawn.createCreep(abilities, creepType + '-' + id, {role: creepType});
+	if (sourceOverride !== undefined) {
+		spawn.createCreep(abilities, creepType + '-' + id, {role: creepType,source: sourceOverride});
+	} else if (targetOverride !== undefined) {
+		spawn.createCreep(abilities, creepType + '-' + id, {role: creepType,target: targetOverride});
+	} else if (sourceOverride !== undefined && targetOverride !== undefined) {
+		spawn.createCreep(abilities, creepType + '-' + id, {role: creepType,source: sourceOverride,target: targetOverride});
+	} else {
+		spawn.createCreep(abilities, creepType + '-' + id, {role: creepType});
+	}
 };
 
 

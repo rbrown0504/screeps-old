@@ -9,64 +9,77 @@ function creepUtility(room) {
 	this.population = 0;
 	this.populationLevelMultiplier = 8;
 	this.creepTypes = {
-		roleHarvester: {
+		roleMiner: {
 			total: 0,
-			goalPercentage: 40,
+			goalPercentage: 0,
 			currentPercentage: 0,
-			max: 15,
-			minExtensions: 0
+			max: 10,
+			minExtensions: 5
 		},
-		/*roleCarrier: {
-			total: 0,
-			goalPercentage: 40,
-			currentPercentage: 0,
-			max: 9,
-			minExtensions: 0
-		},*/
-		/*roleBuilder: {
+		roleHarvester: {
 			total: 0,
 			goalPercentage: 25,
 			currentPercentage: 0,
-			max: 1,
+			max: 5,
 			minExtensions: 0
-		},*/
+		},
+		roleCarrier: {
+			total: 0,
+			goalPercentage: 40,
+			currentPercentage: 0,
+			max: 3,
+			minExtensions: 0
+		},
 		roleLDHarvester: {
 			total: 0,
-			goalPercentage: 10,
+			goalPercentage: 80,
 			currentPercentage: 0,
-			max: 10,
+			max: 0,
 			minExtensions: 0
 		},
 		upgrader: {
 			total: 0,
 			goalPercentage: 40,
 			currentPercentage: 0,
-			max: 12,
+			max: 10,
 			minExtensions: 0
 		},
 		builder: {
 			total: 0,
-			goalPercentage: 10,
+			goalPercentage: 20,
 			currentPercentage: 0,
-			max: 5,
+			max: 0,
+			minExtensions: 0
+		},
+		roleBuilder: {
+			total: 0,
+			goalPercentage: 11,
+			currentPercentage: 0,
+			max: 4,
 			minExtensions: 0
 		},
 		repairer: {
 			total: 0,
-			goalPercentage: 10,
+			goalPercentage: 5,
 			currentPercentage: 0,
 			max: 1,
 			minExtensions: 0
 		},
-		roleMiner: {
+		roleSoldier: {
 			total: 0,
-			goalPercentage: 0,
+			goalPercentage: .01,
 			currentPercentage: 0,
-			max: 0,
+			max: 1,
 			minExtensions: 0
+		},
+		roleClaimer: {
+			total: 0,
+			goalPercentage: 2.5,
+			currentPercentage: 0,
+			max: 1,
+			minExtensions: 1
 		}
 	};	
-
 	for(var i = 0; i < this.creeps.length; i++) {
 		var creepType = this.creeps[i].memory.role;
 		if(!this.creepTypes[creepType]) {
@@ -74,10 +87,8 @@ function creepUtility(room) {
 		}
 		this.creepTypes[creepType].total++;
 	}
-    //console.log('creeptypes' + this.creepTypes);
 	for(var name in this.creepTypes) {
 		var curr = this.creepTypes[name];
-		//console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!total: '+ name +'-'+ curr.total);
 		this.creepTypes[name].currentPercentage = curr.total / this.getTotalPopulation();
 	}
 
@@ -206,7 +217,7 @@ creepUtility.prototype.getEnergy =
             // if one was found
             if (container !== undefined) {
                 // try to withdraw energy, if the container is not in range
-                console.log('get energy!@#!@#!@#!@#!@#!@#@!#!@#@!#');
+                //console.log('get energy!@#!@#!@#!@#!@#!@#@!#!@#@!#');
                 if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards it
                     creep.moveTo(container);
