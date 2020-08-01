@@ -6,12 +6,16 @@ var CONSTS = {
 function Deposits(room) {
 	this.cache = new Cache();
 	this.room = room;
-	this.deposits = this.room.find(
-		FIND_MY_STRUCTURES,
-		{
-			filter: filterExtensions
-		}
-	);
+	this.deposits = this.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    }
+            });
+	console.log('Deposits Length: ' + this.deposits.length);
+
+
+
 
 	this.spawns = [];
 	for(var n in Game.spawns) {
