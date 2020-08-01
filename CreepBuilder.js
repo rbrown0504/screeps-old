@@ -23,22 +23,27 @@ CreepBuilder.prototype.init = function() {
 	}
 
 	this.forceControllerUpgrade = this.remember('forceControllerUpgrade');
-
+    console.log('builder here');
 	//if(this.randomMovement() == false) {
 		this.act();
 	//}
 };
 
 CreepBuilder.prototype.act = function() {
+    console.log('builder act');
 	var site = false;
 	var avoidArea = this.getAvoidedArea();
+	console.log(!this.forceControllerUpgrade);
 	if(!this.forceControllerUpgrade) {
+	    
+	    console.log('here');
 		site = this.constructionManager.constructStructure(this);
 	}
 
 	if(!site) {
 		var site = this.constructionManager.getController();
-		this.creep.moveTo(site, {avoid: avoidArea});
+		//this.creep.moveTo(site, {avoid: avoidArea});
+		this.creep.moveTo(site);
 		this.creep.upgradeController(site);
 	}
 

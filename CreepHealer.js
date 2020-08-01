@@ -21,7 +21,8 @@ CreepHealer.prototype.act = function() {
     var avoidArea = this.getAvoidedArea();
     var injured = this.getInjuredCreep();
     if(injured) {
-        this.creep.moveTo(injured, {avoid: avoidArea});
+        //this.creep.moveTo(injured, {avoid: avoidArea});
+		this.creep.moveTo(injured);
         this.creep.heal(injured);
     }
 

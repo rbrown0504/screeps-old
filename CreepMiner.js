@@ -44,7 +44,8 @@ CreepMiner.prototype.act = function() {
 	if(this.creep.energy == this.creep.energyCapacity) {
 		//return;
 	}
-	this.creep.moveTo(this.resource, {avoid: avoidArea});
+	//this.creep.moveTo(this.resource, {avoid: avoidArea});
+	this.creep.moveTo(this.resource);
 	this.creep.harvest(this.resource);
 	this.remember('last-energy', this.creep.energy);
 }
