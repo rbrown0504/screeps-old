@@ -31,11 +31,13 @@ CreepCarrier.prototype.init = function() {
 	if(!this.remember('source')) {
 		var src = this.resourceManager.getAvailableResource();
 		this.remember('source', src.id);
+		
 	} else {
 		this.resource = this.resourceManager.getResourceById(this.remember('source'));
+		
 	}
 	if(this.depositFor == DEPOSIT_FOR.CONSTRUCTION) {
-		//this.creep.say('w');
+		this.creep.say('construction');
 	}
 	if(!this.remember('srcRoom')) {
 		this.remember('srcRoom', this.creep.room.name);
@@ -63,16 +65,20 @@ CreepCarrier.prototype.getDepositFor = function() {
 
 CreepCarrier.prototype.act = function() {
     var continueDeposit = false;
-	if(this.creep.energy != 0 && this.remember('last-action') == ACTIONS.DEPOSIT) {
+	if(this.creep.store[RESOURCE_ENERGY] != 0 && this.remember('last-action') == ACTIONS.DEPOSIT) {
 		continueDeposit = true;
+		this.creep.say('deposit');
 	}
 
 	this.pickupEnergy();
-
-	if(this.creep.energy < this.creep.energyCapacity && continueDeposit == false) {
+	//console.log('Creep Energy: ' + this.creep.store[RESOURCE_ENERGY] + ' Capacity: ' + this.creep.store.getCapacity());
+	if(this.creep.store[RESOURCE_ENERGY] < this.creep.store.getCapacity() && continueDeposit == false) {
 		this.harvestEnergy();
+		this.creep.say('harvest');
+		//console.log('harvest energy');
 	} else {
 		this.depositEnergy();
+		console.log('deposit energy');
 	}
 };
 
@@ -88,9 +94,12 @@ CreepCarrier.prototype.depositEnergy = function() {
 	}
 
 	if(this.depositFor == DEPOSIT_FOR.POPULATION) {
+
 		var deposit = this.getDeposit();
 		//this.creep.moveTo(deposit, {avoid: avoidArea});
 		this.creep.moveTo(deposit);
+		console.log('here for population: ' + deposit);
+		
 		this.creep.transfer(deposit, RESOURCE_ENERGY);
 		//this.creep.transferEnergy(deposit);
 	}
@@ -156,6 +165,7 @@ CreepCarrier.prototype.pickupEnergy = function() {
 	var target = this.creep.pos.findInRange(FIND_DROPPED_ENERGY,2);
 	if(target.length) {
 	    this.creep.pickup(target[0]);
+		this.creep.say('picking up energy');
 	}
 };
 CreepCarrier.prototype.harvestEnergy = function() {
@@ -177,7 +187,7 @@ CreepCarrier.prototype.harvest = function() {
 		for(var n in creepsNear){
 			if(creepsNear[n].memory.role === 'CreepMiner' && creepsNear[n].energy != 0){
 				//creepsNear[n].transferEnergy(this.creep);
-				this.creep.transfer(this.creep, RESOURCE_ENERGY);
+				creepsNear[n].transfer(this.creep, RESOURCE_ENERGY);
 			}
             if(creepsNear[n].memory.role === 'CreepBuilder'){
                 this.creep.transfer(creepsNear[n], RESOURCE_ENERGY);
