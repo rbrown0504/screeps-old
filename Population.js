@@ -4,6 +4,7 @@ function Population(room) {
 	this.room = room;
 	this.population = 0;
 	this.populationLevelMultiplier = 8;
+	this.roleDistribution = new Map();
 	this.typeDistribution = {
 		CreepMiner: {
 			total: 0,
@@ -50,9 +51,23 @@ function Population(room) {
 	};
 
 	this.creeps = this.room.find(FIND_MY_CREEPS);
-
+	this.creepOrder = new Array();
 	for(var i = 0; i < this.creeps.length; i++) {
 		var creepType = this.creeps[i].memory.role;
+		if (this.roleDistribution.get(creepType) == null ) {
+			var newEntry = new Array();
+			newEntry.push(this.creeps[i].name);
+			this.roleDistribution.set(creepType,newEntry);
+		} else {
+			var updateExisting = this.roleDistribution.get(creepType);
+			console.log(JSON.stringify('UpdateExisting: ' + updateExisting));
+			updateExisting.push(this.creeps[i].name);
+			const sortedScreepsU = updateExisting.sort(function(a, b) {
+			  return a.localeCompare(b)
+
+			});
+			this.roleDistribution.set(creepType,sortedScreepsU);
+		}
 		if(!this.typeDistribution[creepType]) {
 			this.typeDistribution[creepType] = createTypeDistribution(creepType);
 		}
