@@ -29,7 +29,7 @@ CreepFactory.prototype.load = function(creep) {
 			loadedCreep = new CreepBuilder(creep, this.depositManager, this.constructionsManager);
 		break;
 		case 'CreepMiner':
-			loadedCreep = new CreepMiner(creep, this.resourceManager);
+			loadedCreep = new CreepMiner(creep, this.resourceManager, this.population, this.depositManager, this.constructionsManager);
 		break;
 		case 'CreepSoldier':
 			loadedCreep = new CreepSoldier(creep);
@@ -38,7 +38,7 @@ CreepFactory.prototype.load = function(creep) {
 			loadedCreep = new CreepHealer(creep);
 		break;
 		case 'CreepCarrier':
-			loadedCreep = new CreepCarrier(creep, this.depositManager, this.resourceManager, this.constructionsManager);
+			loadedCreep = new CreepCarrier(creep, this.depositManager, this.resourceManager, this.constructionsManager, this.population);
 		break;
 		case 'CreepShooter':
 			loadedCreep = new CreepShooter(creep);
@@ -64,6 +64,7 @@ CreepFactory.prototype.new = function(creepType, spawn) {
 	if(this.population.getTotalPopulation() < 5){
 		level = 1;
 	}
+	console.log('Level: ' + level);
 	// TOUGH          10
 	// MOVE           50
 	// CARRY          50
