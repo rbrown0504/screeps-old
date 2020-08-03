@@ -9,11 +9,11 @@ function Room(room, roomHandler) {
 	this.roomHandler = roomHandler;
 	this.creeps = [];
 	this.structures = [];
-
 	this.population = new Population(this.room);
 	this.depositManager = new Deposits(this.room);
 	this.resourceManager = new Resources(this.room, this.population);
 	this.constructionManager = new Constructions(this.room);
+	this.resourceAssignment = new Map();
 	this.population.typeDistribution.CreepBuilder.max = 4;
 	this.population.typeDistribution.CreepMiner.max = (this.resourceManager.getSources().length+1)*2;
 	this.population.typeDistribution.CreepCarrier.max = this.population.typeDistribution.CreepBuilder.max+this.population.typeDistribution.CreepMiner.max;
@@ -75,9 +75,12 @@ Room.prototype.populate = function() {
 			var types = this.population.getTypes()
 			for(var i = 0; i < types.length; i++) {
 				var ctype = this.population.getType(types[i]);
+				//console.log('Minimum Extensions: ' + ctype.minExtensions);
+				//console.log('Deposits Found: ' + this.depositManager.deposits.length);
 				if(this.depositManager.deposits.length > ctype.minExtensions) {
+					
 					if((ctype.goalPercentage > ctype.currentPercentage && ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75) {
-						this.creepFactory.new(types[i], this.depositManager.getSpawnDeposit());
+						//this.creepFactory.new(types[i], this.depositManager.getSpawnDeposit());
 						break;
 					}
 				}
@@ -96,12 +99,26 @@ Room.prototype.loadCreeps = function() {
 		}
 	}
 	this.distributeBuilders();
+	//let sourceAssignmentMap = new Map()
+	//contacts.set('Jessie', {phone: "213-555-1234", address: "123 N 1st Ave"})
+	//contacts.has('Jessie') // true
+	//contacts.get('Hilary') // undefined
+	//contacts.set('Hilary', {phone: "617-555-4321", address: "321 S 2nd St"})
+	//contacts.get('Jessie') // {phone: "213-555-1234", address: "123 N 1st Ave"}
+	//contacts.delete('Raymond') // false
+	//contacts.delete('Jessie') // true
+	//console.log(contacts.size) // 1
 	this.distributeResources('CreepMiner');
 	this.distributeResources('CreepCarrier');
 	this.distributeCarriers();
 };
 Room.prototype.distributeBuilders = function() {
 	var builderStats = this.population.getType('CreepBuilder');
+	//console.log('Total: ' + builderStats.total);
+	//console.log('Max: ' + builderStats.max);
+	//console.log('Goal: ' + builderStats.goalPercentage);
+	//console.log('Current: ' + builderStats.currentPercentage);
+	//console.log(builderStats.minExtensions);
 	if(this.depositManager.spawns.length == 0) {
 		for(var i = 0; i < this.creeps.length; i++) {
 			var creep = this.creeps[i];
@@ -184,6 +201,30 @@ Room.prototype.distributeCarriers = function() {
 Room.prototype.distributeResources = function(type) {
 	var sources = this.resourceManager.getSources();
 	var perSource = Math.ceil(this.population.getType(type).total/sources.length);
+	//console.log('total: ' + this.population.getType(type).total);
+	//console.log('sources: ' + sources);
+	//console.log(sources[0].structure);
+	//console.log('persource: ' + perSource);
+	//this.sourceAssignment = new Map();	
+	//var sourcesInit = this.getSources();	
+	for(var i = 0; i < sources.length; i++) {
+		this.resourceAssignment[sources[i].id] = {primaryCount : 0, assignment : ''};
+	}
+	
+	//this.creeps = this.room.find(FIND_MY_CREEPS);
+
+	/* for(var i = 0; i < this.creeps.length; i++) {
+		var creepSource = this.creeps[i].memory.source;
+		var sourceFound = this.sourceAssignment[creepSource];
+		if (sourceFound != null) {			
+			this.sourceAssignment[creepSource].primaryCount++;
+		}		
+	} */
+	//console.log('SourceAssignment: ' + JSON.stringify(sourceAssignment));
+	//console.log('ResourceAssignment: ' + JSON.stringify(this.resourceAssignment));
+	
+	
+	
 	var counter = 0;
 	var source = 0;
 
@@ -192,12 +233,16 @@ Room.prototype.distributeResources = function(type) {
 		if(creep.remember('role') != type) {
 			continue;
 		}
-
 		if(!sources[source]) {
 			continue;
 		}
-
-		creep.remember('source', sources[source].id);
+		this.resourceAssignment[sources[source].id].primaryCount++;
+		if (this.resourceAssignment[sources[source].id].assignment != null) {
+			var existing = this.resourceAssignment[sources[source].id].assignment
+			this.resourceAssignment[sources[source].id].assignment = existing +',' + creep.creep.name;
+		} else {
+			this.resourceAssignment[sources[source].id].assignment = creep.creep.name;
+		}
 		counter++;
 		if(counter >= perSource) {
 			counter = 0;
