@@ -8,19 +8,22 @@
 var Cache = require('Cache');
 var ACTIONS = {
 	HARVEST: 1,
-	DEPOSIT: 2
+	DEPOSIT: 2,
+	DEPOSIT_WORKER: 3,
+	DEPOSIT_SPAWN: 4
 };
 var DEPOSIT_FOR = {
 	CONSTRUCTION: 1,
 	POPULATION: 2
 }
 
-function CreepCarrier(creep, depositManager, resourceManager, constructionsManager) {
+function CreepCarrier(creep, depositManager, resourceManager, constructionsManager, population) {
 	this.cache = new Cache();
 	this.creep = creep;
 	this.depositManager = depositManager;
 	this.resourceManager = resourceManager;
 	this.constructionsManager = constructionsManager;
+	this.population = population;
 	this.resource = false;
 	this.target = false;
 };
@@ -28,14 +31,19 @@ function CreepCarrier(creep, depositManager, resourceManager, constructionsManag
 CreepCarrier.prototype.init = function() {
 	this.remember('role', 'CreepCarrier');
 	this.depositFor = this.remember('depositFor') || 2;
+	var newSrc = this.resourceManager.getAvailableResourceLowestAssigned();
+	//console.log(newSrc);
 	if(!this.remember('source')) {
 		var src = this.resourceManager.getAvailableResource();
 		this.remember('source', src.id);
 		
+				
 	} else {
+		//console.log('CreepCarrierNewSource: ');
 		this.resource = this.resourceManager.getResourceById(this.remember('source'));
 		
 	}
+	//console.log('creepCarrier distributionLength: ' + this.population.sourceDistribution.get(this.resource.id).length);
 	if(this.depositFor == DEPOSIT_FOR.CONSTRUCTION) {
 		this.creep.say('construction');
 	}
@@ -64,64 +72,66 @@ CreepCarrier.prototype.getDepositFor = function() {
 }
 
 CreepCarrier.prototype.act = function() {
-    var continueDeposit = false;
-	if(this.creep.store[RESOURCE_ENERGY] != 0 && this.remember('last-action') == ACTIONS.DEPOSIT) {
-		continueDeposit = true;
-		this.creep.say('deposit');
-	}
-
-	this.pickupEnergy();
-	//console.log('Creep Energy: ' + this.creep.store[RESOURCE_ENERGY] + ' Capacity: ' + this.creep.store.getCapacity());
-	if(this.creep.store[RESOURCE_ENERGY] < this.creep.store.getCapacity() && continueDeposit == false) {
-		this.harvestEnergy();
-		this.creep.say('harvest');
-		//console.log('harvest energy');
-	} else {
-		this.depositEnergy();
-		console.log('deposit energy');
-	}
-};
-
-CreepCarrier.prototype.depositEnergy = function() {
 	var avoidArea = this.getAvoidedArea();
-
-	if(this.depositManager.getEmptyDeposits().length == 0 && this.depositManager.getSpawnDeposit().energy == this.depositManager.getSpawnDeposit().energyCapacity) {
-		this.depositFor = DEPOSIT_FOR.CONSTRUCTION;
-	}
-
-	if(this.depositManager.energy() / this.depositManager.energyCapacity() < 0.3) {
-		this.depositFor = DEPOSIT_FOR.POPULATION;
-	}
-
-	if(this.depositFor == DEPOSIT_FOR.POPULATION) {
-
-		var deposit = this.getDeposit();
-		//this.creep.moveTo(deposit, {avoid: avoidArea});
-		this.creep.moveTo(deposit);
-		console.log('here for population: ' + deposit);
-		
-		this.creep.transfer(deposit, RESOURCE_ENERGY);
-		//this.creep.transferEnergy(deposit);
-	}
-
-	if(this.depositFor == DEPOSIT_FOR.CONSTRUCTION) {
-		var worker = this.getWorker();
-		var range = 1;
-		if(!worker) {
-			worker = this.constructionsManager.controller;
-			range = 2;
-		}
-
-		if(!this.creep.pos.isNearTo(worker, range)) {
-			//this.creep.moveTo(worker, {avoid: avoidArea});
-			this.creep.moveTo(worker);
+	//this.giveEnergy();
+	console.log('CreepCarrier.act');
+	if(this.creep.store[RESOURCE_ENERGY] == this.creep.store.getCapacity()) {
+		if(this.population.typeDistribution['CreepCarrier'].total == 0) {
+			console.log('CreepCarrier.act.noCarrier');
+			//this.creep.say('carrierFull');
+			this.depositEnergy();			
 		} else {
-			this.remember('move-attempts', 0);
+			this.creep.say('carrierFullAct');			
+			console.log('CreepCarrier.act.depositWCarrier');
+			this.depositEnergy();
 		}
-		this.harvest();
+	} else if (this.creep.store[RESOURCE_ENERGY] > 0) {
+		console.log('Carrier: need to do something');
+		if (this.remember('lastAction') == ACTIONS.DEPOSIT_CONTROLLER) {
+			console.log('Carrier: needToDepositController');
+			// var deposit = this.constructionManager.controller;
+			// console.log('creepMiner.deposit: ' + deposit);
+			// console.log('creepMiner.deposit.upgradeErrInRange: ' + this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE);
+			// if(this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE) {
+				// console.log('creepMiner.deposit.moveTO');
+				// this.creep.moveTo(deposit, {visualizePathStyle: {stroke: '#ffffff'}});
+			// }
+			
+		}else if (this.remember('lastAction') == ACTIONS.DEPOSIT_SPAWN) {
+			console.log('Carrier: needToDepositSpawn');
+			var spawns = this.depositManager.spawns;		
+			console.log('Spawn ' + spawns);			
+			this.creep.moveTo(spawns[0]);
+			this.creep.transfer(spawns[0], RESOURCE_ENERGY);
+			// var deposit = this.constructionManager.controller;
+			// console.log('creepMiner.deposit: ' + deposit);
+			// console.log('creepMiner.deposit.upgradeErrInRange: ' + this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE);
+			// if(this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE) {
+				// console.log('creepMiner.deposit.moveTO');
+				// this.creep.moveTo(deposit, {visualizePathStyle: {stroke: '#ffffff'}});
+			// }
+		} else if (this.remember('lastAction') == ACTIONS.HARVEST) {
+			console.log('creepCarrier.deposit.lastAction Harvest');
+			this.creep.moveTo(this.resource);
+			this.creep.harvest(this.resource);
+			this.remember('lastAction', ACTIONS.HARVEST);
+		} else {
+			this.remember('lastAction', ACTIONS.HARVEST);
+		}
+    } else if (this.creep.store[RESOURCE_ENERGY] == 0) {
+		//this.creep.moveTo(this.resource, {avoid: avoidArea});
+		this.creep.moveTo(this.resource);
+		this.creep.harvest(this.resource);
+		this.remember('lastAction', ACTIONS.HARVEST);
+		console.log('CreepCarrier.act.harvest');
+	} else {
+		console.log('Else-CreepCarrier.act.harvest');
+		this.creep.moveTo(this.resource);
+		this.creep.harvest(this.resource);
+		this.remember('lastAction', ACTIONS.HARVEST);		
+		
 	}
-
-	this.remember('last-action', ACTIONS.DEPOSIT);
+	this.remember('last-energy', this.creep.energy);
 }
 
 CreepCarrier.prototype.getWorker = function() {
@@ -131,6 +141,125 @@ CreepCarrier.prototype.getWorker = function() {
 
 	return false;
 }
+
+CreepCarrier.prototype.depositEnergy = function() {
+	var avoidArea = this.getAvoidedArea();
+	//console.log('Empty Deposits: ' + this.depositManager.getEmptyDeposits().length);
+	/* if (this.remember('lastAction') == ACTIONS.DEPOSIT_CONTROLLER) {
+		var deposit = this.constructionManager.controller;
+		console.log('creepMiner.deposit: ' + deposit);
+		console.log('creepMiner.deposit.upgradeErrInRange: ' + this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE);
+		if(this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE) {
+			console.log('creepMiner.deposit.moveTO');
+			this.creep.moveTo(deposit, {visualizePathStyle: {stroke: '#ffffff'}});
+		} else {
+			console.log('creepMiner.deposit.upgradeController');
+			this.creep.upgradeController(deposit);
+		}
+		console.log('creepMiner: deposit for controller last action');
+		
+		//this.creep.moveTo(deposit);
+		//this.creep.upgradeController(deposit, RESOURCE_ENERGY);
+		
+		this.remember('lastAction', ACTIONS.DEPOSIT_CONTROLLER);
+		
+		
+	} else if (this.remember('lastAction') == ACTIONS.DEPOSIT) {
+		var deposit = this.constructionsManager.controller;
+		// console.log('creepMiner.deposit: ' + deposit);
+		// console.log('creepMiner.deposit.upgradeErrInRange: ' + this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE);
+		// if(this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE) {
+			// console.log('creepMiner.deposit.moveTO');
+			// this.creep.moveTo(deposit, {visualizePathStyle: {stroke: '#ffffff'}});
+		// } else {
+			// console.log('creepMiner.deposit.upgradeController');
+			// this.creep.upgradeController(deposit);
+		// }
+		console.log('creepMiner: deposit for spawn last action');
+		
+		
+		//this.creep.moveTo(deposit);
+		//this.creep.upgradeController(deposit, RESOURCE_ENERGY);
+		
+		this.remember('lastAction', ACTIONS.DEPOSIT);
+		
+		
+	} else  */
+	console.log('creepcarrier.depositEnergy');
+	if(this.depositManager.getEmptyDeposits().length == 0 && this.depositManager.getSpawnDeposit().energy == this.depositManager.getSpawnDeposit().energyCapacity) {		
+		this.depositFor = DEPOSIT_FOR.CONSTRUCTION;
+		console.log('creepCarrier: depositForConstruction');
+	} else if(this.depositManager.energy() / this.depositManager.energyCapacity() < 0.3) {
+		this.depositFor = DEPOSIT_FOR.POPULATION;		
+		console.log('creepCarrier: depositForPopulation');
+	} else {
+		this.depositFor = DEPOSIT_FOR.CONTROLLER;		
+		console.log('creepCarrier: depositForController');
+	}
+	
+	if(this.depositFor == DEPOSIT_FOR.POPULATION) {
+		
+		//TRANSFER TO SPAWN
+		var deposit = this.getDeposit();
+		//this.creep.moveTo(deposit, {avoid: avoidArea});
+		this.creep.moveTo(deposit);
+		this.creep.say('CdepositPop');
+		//console.log('here for population: ' + deposit);
+		this.creep.transfer(deposit, RESOURCE_ENERGY);
+		this.remember('lastAction', ACTIONS.DEPOSIT);
+		console.log('CarrierPopulationDeposit');
+		//this.creep.transferEnergy(deposit);
+	} else if(this.depositFor == DEPOSIT_FOR.CONSTRUCTION) {
+		console.log('Carrier: depositForConstructionAction');
+		var spawns = this.depositManager.spawns;
+		//console.log('Spawn ' + spawns);
+		this.creep.say('CdepositCons');
+		console.log('CarrierConstructionDeposit***');
+		//var deposit = spawns;
+		//this.creep.moveTo(deposit[0]);
+		//this.creep.transfer(deposit[0], RESOURCE_ENERGY);
+		if(this.creep.transfer(spawns[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+			console.log('creepCarrier.deposit.moveTO');
+			this.creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#ffffff'}});
+		}
+		this.remember('lastAction', ACTIONS.DEPOSIT_SPAWN);
+		
+		var site = this.constructionsManager.getClosestConstructionSite(this.creep);
+		console.log('ClosestConstructin: ' + JSON.stringify(site));
+		if(this.creep.build(site) == ERR_NOT_IN_RANGE) {
+			this.creep.moveTo(site, {visualizePathStyle: {stroke: '#ffffff'}});
+		}
+		
+		var worker = this.getWorker();
+		var range = 1;
+		if(!worker) {
+			console.log('ClosestController: ' + JSON.stringify(site));
+			worker = this.constructionsManager.controller;
+			range = 2;
+		}
+
+		if(!this.creep.pos.isNearTo(worker, range)) {
+			//this.creep.moveTo(worker, {avoid: avoidArea});
+			this.creep.moveTo(worker);
+			
+			this.creep.say('depositCon');
+		} else {
+			this.remember('move-attempts', 0);
+		}
+		
+		this.harvest();
+		
+	} else if (this.depositFor == DEPOSIT_FOR.CONTROLLER) {
+		this.creep.say('CdepositConT');
+		console.log('CarrierConstructionController***');
+		var deposit = this.constructionsManager.controller;
+		this.creep.moveTo(deposit);
+		this.creep.transfer(deposit, RESOURCE_ENERGY);
+		this.remember('lastAction', ACTIONS.DEPOSIT_CONTROLLER);
+	}
+	
+}
+
 CreepCarrier.prototype.getDeposit = function() {
 	return this.cache.remember(
 		'selected-deposit',
@@ -155,6 +284,7 @@ CreepCarrier.prototype.getDeposit = function() {
 		}.bind(this)
 	)
 };
+
 CreepCarrier.prototype.pickupEnergy = function() {
 	var avoidArea = this.getAvoidedArea();
 	if(this.creep.energy == this.creep.energyCapacity) {
@@ -163,35 +293,81 @@ CreepCarrier.prototype.pickupEnergy = function() {
 
 	//var target = this.creep.pos.findInRange(FIND_DROPPED_ENERGY,2, {avoid: avoidArea});
 	var target = this.creep.pos.findInRange(FIND_DROPPED_ENERGY,2);
+	//console.log('dropped energy: ' + target.length);
 	if(target.length) {
 	    this.creep.pickup(target[0]);
 		this.creep.say('picking up energy');
 	}
 };
 CreepCarrier.prototype.harvestEnergy = function() {
-	//this.creep.moveTo(0,0);
 	var avoidArea = this.getAvoidedArea();
-
 	//this.creep.moveTo(this.resource, {avoid: avoidArea});
 	this.creep.moveTo(this.resource);
+	//harvest energy as long as there's not too much activity happening
 	if(this.creep.pos.inRangeTo(this.resource, 3)) {
 		this.harvest();
+		this.remember('activeHarvest', this.resource.id);
+		//console.log('gotoHarvest');
+	} else {
+		this.remember('activeHarvest', null);
 	}
+	
+	this.remember('last-action', ACTIONS.HARVEST);
+	this.forget('closest-deposit');
+}
+
+CreepCarrier.prototype.depositEnergyWorker = function() {
+	var avoidArea = this.getAvoidedArea();
+	//this.creep.moveTo(this.resource, {avoid: avoidArea});
+	this.creep.moveTo(this.resource);
+	//harvest energy as long as there's not too much activity happening
+	if(this.creep.pos.inRangeTo(this.resource, 3)) {
+		this.harvest();
+		this.remember('activeHarvest', this.resource.id);
+		//console.log('gotoHarvest');
+	} else {
+		this.remember('activeHarvest', null);
+	}
+	
 	this.remember('last-action', ACTIONS.HARVEST);
 	this.forget('closest-deposit');
 }
 
 CreepCarrier.prototype.harvest = function() {
 	var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS, 1);
+	//console.log('here');
 	if(creepsNear.length){
 		for(var n in creepsNear){
-			if(creepsNear[n].memory.role === 'CreepMiner' && creepsNear[n].energy != 0){
-				//creepsNear[n].transferEnergy(this.creep);
-				creepsNear[n].transfer(this.creep, RESOURCE_ENERGY);
-			}
-            if(creepsNear[n].memory.role === 'CreepBuilder'){
+			// if(creepsNear[n].memory.role === 'CreepMiner' && creepsNear[n].energy != 0){
+				////creepsNear[n].transferEnergy(this.creep);
+				// creepsNear[n].transfer(this.creep, RESOURCE_ENERGY);
+			// }
+			//if(this.creep.store[RESOURCE_ENERGY] < this.creep.store.getCapacity()
+            if(creepsNear[n].memory.role === 'CreepBuilder' && this.creep.store[RESOURCE_ENERGY] > 0){
                 this.creep.transfer(creepsNear[n], RESOURCE_ENERGY);
                 //this.creep.transferEnergy(creepsNear[n]);
+			} else {
+				
+			}
+		}
+	}
+}
+
+CreepCarrier.prototype.depositWorker = function() {
+	var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS, 1);
+	//console.log('here');
+	if(creepsNear.length){
+		for(var n in creepsNear){
+			// if(creepsNear[n].memory.role === 'CreepMiner' && creepsNear[n].energy != 0){
+				////creepsNear[n].transferEnergy(this.creep);
+				// creepsNear[n].transfer(this.creep, RESOURCE_ENERGY);
+			// }
+			//if(this.creep.store[RESOURCE_ENERGY] < this.creep.store.getCapacity()
+            if(creepsNear[n].memory.role === 'CreepBuilder' && this.creep.store[RESOURCE_ENERGY] > 0){
+                this.creep.transfer(creepsNear[n], RESOURCE_ENERGY);
+                //this.creep.transferEnergy(creepsNear[n]);
+			} else {
+				
 			}
 		}
 	}
