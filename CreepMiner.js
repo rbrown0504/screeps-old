@@ -55,23 +55,20 @@ CreepMiner.prototype.act = function() {
 		if(this.population.typeDistribution['CreepCarrier'].total == 0) {
 			//console.log('CreepMiner.act.noCarrier');
 			this.creep.say('minerFull');
-			this.depositEnergy();			
+			//this.depositEnergy();			
 		} else {
 			this.creep.say('minerCarrier');			
 			//console.log('CreepMiner.act.depositWCarrier');
-			this.depositEnergy();
+			//this.depositEnergy();
 		}
 	} else if (this.creep.store[RESOURCE_ENERGY] > 0) {
 		//console.log('need to do something');
 		if (this.remember('lastAction') == ACTIONS.DEPOSIT_CONTROLLER) {
 			//console.log('needToDepositController');
-			var deposit = this.constructionManager.controller;
-			//console.log('creepMiner.deposit: ' + deposit);
-			//console.log('creepMiner.deposit.upgradeErrInRange: ' + this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE);
-			if(this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE) {
-				//console.log('creepMiner.deposit.moveTO');
-				this.creep.moveTo(deposit, {visualizePathStyle: {stroke: '#ffffff'}});
-			}
+			//var deposit = this.constructionManager.controller;
+			// if(this.creep.upgradeController(deposit) == ERR_NOT_IN_RANGE) {
+				// this.creep.moveTo(deposit, {visualizePathStyle: {stroke: '#ffffff'}});
+			// }
 		} else if (this.remember('lastAction') == ACTIONS.HARVEST) {
 			//console.log('creepMiner.deposit.lastAction Harvest');
 			this.creep.moveTo(this.resource);
@@ -154,10 +151,10 @@ CreepMiner.prototype.depositEnergy = function() {
 		//this.creep.transferEnergy(deposit);
 	} else if(this.depositFor == DEPOSIT_FOR.CONSTRUCTION) {
 		//console.log('depositForConstructionAction');
-		var deposit = this.constructionManager.controller;
-		this.creep.moveTo(deposit);
-		this.creep.transfer(deposit, RESOURCE_ENERGY);
-		this.remember('lastAction', ACTIONS.DEPOSIT_CONTROLLER);
+		// var deposit = this.constructionManager.controller;
+		// this.creep.moveTo(deposit);
+		// this.creep.transfer(deposit, RESOURCE_ENERGY);
+		// this.remember('lastAction', ACTIONS.DEPOSIT_CONTROLLER);
 		//setting all work towards controller right now
 		//this.depositFor == DEPOSIT_FOR.CONTROLLER;
 		//var site = this.constructionsManager.getClosestConstructionSite(this.creep);
@@ -183,10 +180,10 @@ CreepMiner.prototype.depositEnergy = function() {
 		this.harvest(); */
 		
 	} else if (this.depositFor == DEPOSIT_FOR.CONTROLLER) {
-		var deposit = this.constructionManager.controller;
-		this.creep.moveTo(deposit);
-		this.creep.transfer(deposit, RESOURCE_ENERGY);
-		this.remember('lastAction', ACTIONS.DEPOSIT_CONTROLLER);
+		// var deposit = this.constructionManager.controller;
+		// this.creep.moveTo(deposit);
+		// this.creep.transfer(deposit, RESOURCE_ENERGY);
+		// this.remember('lastAction', ACTIONS.DEPOSIT_CONTROLLER);
 	}
 	
 }
