@@ -5,15 +5,15 @@
  * You can import it from another modules like this:
  * var mod = require('Builder'); // -> 'a thing'
  */
-var CreepBuilder = function(creep, depositManager, constructionManager) {
+var CreepUpgrader = function(creep, depositManager, constructionManager) {
 	this.creep = creep;
 	this.depositManager = depositManager;
 	this.constructionManager = constructionManager;
 	this.forceControllerUpgrade = false;
 };
 
-CreepBuilder.prototype.init = function() {
-	this.remember('role', 'CreepBuilder');
+CreepUpgrader.prototype.init = function() {
+	this.remember('role', 'CreepUpgrader');
 	if(!this.remember('srcRoom')) {
 		this.remember('srcRoom', this.creep.room.name);
 	}
@@ -29,28 +29,29 @@ CreepBuilder.prototype.init = function() {
 	//}
 };
 
-CreepBuilder.prototype.act = function() {
-    //console.log('builder act');
+CreepUpgrader.prototype.act = function() {
+    //console.log('upgrader act');
 	var site = false;
 	var avoidArea = this.getAvoidedArea();
 	//console.log('Controller Upgrade:' + this.forceControllerUpgrade);
-	if(!this.forceControllerUpgrade) {
-	    
-	    //console.log('Constructing Structure');
-		site = this.constructionManager.constructStructure(this);
+	// if(!this.forceControllerUpgrade) {
+	    	    
+		// site = this.constructionManager.constructStructure(this);
 		
-	}
+	// }
 
 	if(!site) {		
 		var site = this.constructionManager.getController();
-		var sites = this.constructionManager.sites;
-		//console.log(JSON.stringify(sites[0]));		
+		//var sites = this.constructionManager.sites;
+		//console.log('upgrader source ' + JSON.stringify(site));		
 		//this.creep.moveTo(site, {avoid: avoidArea});		
 		//go to first construction site found
-		this.creep.say('building');
-		if(this.creep.build(sites[0]) == ERR_NOT_IN_RANGE) {
-			this.creep.moveTo(sites[0], {visualizePathStyle: {stroke: '#ffffff'}});
-		}
+		this.creep.say('upgrading');
+		//if(this.creep.upgradeController(site) == ERR_NOT_IN_RANGE) {
+			//console.log('creepUpgrader move to');
+			this.creep.moveTo(site, {visualizePathStyle: {stroke: '#ffffff'}});
+			this.creep.upgradeController(site);
+		//}
 	}
 
 	if(this.creep.pos.inRangeTo(site, 3)) {
@@ -59,7 +60,7 @@ CreepBuilder.prototype.act = function() {
 	this.remember('last-energy', this.creep.energy);
 };
 
-CreepBuilder.prototype.giveEnergy = function(site) {
+CreepUpgrader.prototype.giveEnergy = function(site) {
 	var creepsNear = this.creep.pos.findInRange(FIND_MY_CREEPS, 1);
 	if(creepsNear.length){
 		if(site) {
@@ -80,7 +81,7 @@ CreepBuilder.prototype.giveEnergy = function(site) {
 			return;
 		}
 		for(var n in creepsNear){
-			if(creepsNear[n].memory.role === 'CreepBuilder'){
+			if(creepsNear[n].memory.role === 'CreepUpgrader'){
 				if(creepsNear[n].memory['last-energy'] > creepsNear[n].energy) {
 					this.creep.transferEnergy(creepsNear[n]);
 				}
@@ -89,4 +90,4 @@ CreepBuilder.prototype.giveEnergy = function(site) {
 	}
 }
 
-module.exports = CreepBuilder;
+module.exports = CreepUpgrader;

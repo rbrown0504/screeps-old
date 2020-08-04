@@ -4,7 +4,7 @@ var CONST = {
 };
 var Cache = require('Cache');
 
-function Constructions(room) {
+function Constructions(room, population) {
     this.room = room;
     this.cache = new Cache();
     this.sites = this.room.find(FIND_CONSTRUCTION_SITES);
@@ -12,6 +12,29 @@ function Constructions(room) {
     this.damagedStructures = this.getDamagedStructures();
     this.upgradeableStructures = this.getUpgradeableStructures();
     this.controller = this.room.controller;
+	this.population = population;
+	this.buildersNear = new Map();
+	for(var i = 0; i < this.sites.length; i++) {		
+		for(var i1 = 0; i1 < this.population.creeps.length; i1++) {
+			var theCreep = this.population.creeps[i1];
+			if(theCreep.pos.isNearTo(this.sites[i])) {								
+				if(theCreep.memory.role == 'CreepBuilder') {
+					if (this.buildersNear.get(this.sites[i]) != null) {
+						var existingWorkers = new Array();
+						existingWorkers = this.buildersNear.get(this.sites[i]);
+						//existingWorkers.push(theCreep.name);
+						existingWorkers.push(theCreep.id);
+						this.buildersNear.set(this.sites[i],existingWorkers);
+					} else {
+						var addWorkers = new Array();
+						//addWorkers.push(theCreep.name);
+						addWorkers.push(theCreep.id);
+						this.buildersNear.set(this.sites[i],addWorkers);
+					}
+				}
+			}
+		}
+	}
 };
 
 
@@ -86,7 +109,7 @@ Constructions.prototype.getClosestConstructionSite = function(creep) {
 
 Constructions.prototype.constructStructure = function(creep) {
     var avoidArea = creep.getAvoidedArea();
-    console.log('constructStructure');
+    //console.log('constructStructure');
     if(this.damagedStructures.length != 0) {
         site = creep.creep.pos.findClosestByPath(this.damagedStructures);
         //creep.creep.moveTo(site, {avoid: avoidArea});
@@ -97,7 +120,7 @@ Constructions.prototype.constructStructure = function(creep) {
     }
 
     if(this.sites.length != 0) {
-		console.log('looking for a site');
+		//console.log('looking for a site');
         site = creep.creep.pos.findClosestByPath(this.sites);
         //creep.creep.moveTo(site, {avoid: avoidArea});
 		creep.creep.moveTo(site);

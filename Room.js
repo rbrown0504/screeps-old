@@ -12,7 +12,7 @@ function Room(room, roomHandler) {
 	this.population = new Population(this.room);
 	this.depositManager = new Deposits(this.room);
 	this.resourceManager = new Resources(this.room, this.population);
-	this.constructionManager = new Constructions(this.room);
+	this.constructionManager = new Constructions(this.room, this.population);
 	this.resourceAssignment = new Map();
 	this.population.typeDistribution.CreepBuilder.max = 4;
 	this.population.typeDistribution.CreepMiner.max = (this.resourceManager.getSources().length+1)*2;
