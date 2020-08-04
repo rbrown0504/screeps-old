@@ -12,10 +12,6 @@ function Deposits(room) {
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
-	console.log('Deposits Length: ' + this.deposits.length);
-
-
-
 
 	this.spawns = [];
 	for(var n in Game.spawns) {
