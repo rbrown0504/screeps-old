@@ -158,12 +158,9 @@ Room.prototype.distributeBuilders = function() {
 			creep.remember('forceControllerUpgrade', false);
 		}
 	} else {
-<<<<<<< Updated upstream
-=======
 		console.log('room.builderStatselse');
 		//this seems to be adding 2 to upgrade controller every time population is greater than 3 (issue 1)
 		//the issue here is that the list creeps can return inconsistent sort and appears to eventually make every builder a controller contributer
->>>>>>> Stashed changes
 		var c = 0;
 		for(var i = 0; i < this.creeps.length; i++) {
 			var creep = this.creeps[i];
