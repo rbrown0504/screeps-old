@@ -16,6 +16,7 @@ function Population(room) {
 			goalPercentage: 0.2,
 			currentPercentage: 0,
 			max: 2,
+			min: 2,
 			//max: 5,
 			minExtensions: 0
 		},
@@ -25,6 +26,7 @@ function Population(room) {
 			currentPercentage: 0,
 			//max: 15,
 			max: 2,
+			min: 2,
 			minExtensions: 0			
 		},
 		CreepBuilder: {
@@ -32,6 +34,7 @@ function Population(room) {
 			goalPercentage: 0.25,
 			currentPercentage: 0,
 			max: 15,
+			min: 3,
 			minExtensions: 0
 		},
 		CreepHealer: {
@@ -39,6 +42,7 @@ function Population(room) {
 			goalPercentage: 0.25,
 			currentPercentage: 0,
 			max: 2,
+			min: 0,
 			minExtensions: 2
 		},
 		CreepSoldier: {
@@ -46,6 +50,7 @@ function Population(room) {
 			goalPercentage: 0.25,
 			currentPercentage: 0,
 			max: 5,
+			min: 0,
 			minExtensions: 2
 		},
 		CreepShooter: {
@@ -53,6 +58,7 @@ function Population(room) {
 			goalPercentage: 0.2,
 			currentPercentage: 0,
 			max: 3,
+			min: 0,
 			minExtensions: 10
 		},
 		CreepUpgrader: {
@@ -60,6 +66,7 @@ function Population(room) {
 			goalPercentage: 0.2,
 			currentPercentage: 0,
 			max: 3,
+			min: 0,
 			minExtensions: 0
 		}
 	};
@@ -98,7 +105,7 @@ function Population(room) {
 		}
 		
 		if (this.creeps[i].pos.isNearTo(this.room.controller) ) {
-			console.log('nearController');
+			//console.log('nearController');
 			if (this.nearController.get(creepType) != null) {
 				var existingWorker = new Array();
 				existingWorker = this.nearController.get(creepType);
@@ -112,9 +119,9 @@ function Population(room) {
 		}
 		
 		if (creepType == 'CreepMiner') {
-			console.log('minerEnergy' + this.creeps[i].store[RESOURCE_ENERGY]);
-			console.log('minerEnergyTotal' + this.creeps[i].store.getCapacity());
-			console.log('full miner found'  + this.creeps[i].store[RESOURCE_ENERGY] == this.creeps[i].store.getCapacity());
+			//console.log('minerEnergy' + this.creeps[i].store[RESOURCE_ENERGY]);
+			//console.log('minerEnergyTotal' + this.creeps[i].store.getCapacity());
+			//console.log('full miner found'  + this.creeps[i].store[RESOURCE_ENERGY] == this.creeps[i].store.getCapacity());
 			//console.log('full miner found' );
 			//minerFull.push();
 			
