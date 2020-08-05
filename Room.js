@@ -17,7 +17,9 @@ function Room(room, roomHandler) {
 	this.population.typeDistribution.CreepBuilder.max = 4;
 	this.population.typeDistribution.CreepMiner.max = (this.resourceManager.getSources().length+1)*2;
 	this.population.typeDistribution.CreepCarrier.max = this.population.typeDistribution.CreepBuilder.max+this.population.typeDistribution.CreepMiner.max;
+	//console.log('preCreepFactory');
 	this.creepFactory = new CreepFactory(this.depositManager, this.resourceManager, this.constructionManager, this.population, this.roomHandler);
+	//console.log(JSON.stringify(this.creepFactory));
 }
 
 Room.prototype.askForReinforcements = function() {
@@ -41,6 +43,8 @@ Room.prototype.sendReinforcements = function(room) {
 		console.log(this.room.name + ': already given reinforcements');
 		return;
 	}
+	console.log('room.population: ' + this.population.getTotalPopulation());
+	console.log('room.population.max: ' + this.population.getMaxPopulation());
 	if(this.population.getTotalPopulation() < this.population.getMaxPopulation()*0.8) {
 		console.log(this.room.name + ': Not enough resources ' + '(' + this.population.getTotalPopulation() + '/' + this.population.getMaxPopulation()*0.8 + ')');
 		return;
@@ -75,14 +79,33 @@ Room.prototype.populate = function() {
 			var types = this.population.getTypes()
 			for(var i = 0; i < types.length; i++) {
 				var ctype = this.population.getType(types[i]);
-				//console.log('Minimum Extensions: ' + ctype.minExtensions);
-				//console.log('Deposits Found: ' + this.depositManager.deposits.length);
+				// console.log('Minimum Extensions: ' + ctype.minExtensions);
+				// console.log('Deposits Found: ' + this.depositManager.deposits.length);
+				// console.log('Type: ' + types[i]);
+				// console.log('ctype.min ' + ctype.min);
+				// console.log('ctype.total ' + ctype.total);
 				if(this.depositManager.deposits.length > ctype.minExtensions) {
 					
-					if((ctype.goalPercentage > ctype.currentPercentage && ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75) {
-						//this.creepFactory.new(types[i], this.depositManager.getSpawnDeposit());
+					if (ctype.min > ctype.total && (types[i] == 'CreepMiner' || types[i] == 'CreepMiner' ) ) {
+						console.log('Spawning Minimim');
+						this.creepFactory.new(types[i], this.depositManager.getSpawnDeposit());
 						break;
+					} else {
+						if((ctype.goalPercentage > ctype.currentPercentage && ctype.total < ctype.max) || ctype.total == 0 || ctype.total < ctype.max*0.75) {
+							this.creepFactory.new(types[i], this.depositManager.getSpawnDeposit());
+							break;
+						}
 					}
+					
+					
+				} else if (this.population.getTotalPopulation() < 10) {
+					this.creepFactory.new(types[i], this.depositManager.getSpawnDeposit());
+					break;
+				} else if (this.population.getTotalPopulation() > 11 && (types[i] == 'CreepMiner' || types[i] == 'CreepCarrier' || types[i] == 'CreepBuilder') && ctype.min > ctype.total) {
+					//added this in because there was only one builder and a ton of carriers around it. nothing was spawning for a builder.
+					console.log('Room.CatchUpSpawn');
+					this.creepFactory.new(types[i], this.depositManager.getSpawnDeposit());
+					break;
 				}
 			}
 		}
@@ -114,11 +137,6 @@ Room.prototype.loadCreeps = function() {
 };
 Room.prototype.distributeBuilders = function() {
 	var builderStats = this.population.getType('CreepBuilder');
-	//console.log('Total: ' + builderStats.total);
-	//console.log('Max: ' + builderStats.max);
-	//console.log('Goal: ' + builderStats.goalPercentage);
-	//console.log('Current: ' + builderStats.currentPercentage);
-	//console.log(builderStats.minExtensions);
 	if(this.depositManager.spawns.length == 0) {
 		for(var i = 0; i < this.creeps.length; i++) {
 			var creep = this.creeps[i];
@@ -130,6 +148,7 @@ Room.prototype.distributeBuilders = function() {
 		}
 		return;
 	}
+	console.log('Room.BuilderStats ' + JSON.stringify(builderStats<=3));
 	if(builderStats <= 3) {
 		for(var i = 0; i < this.creeps.length; i++) {
 			var creep = this.creeps[i];
@@ -139,12 +158,19 @@ Room.prototype.distributeBuilders = function() {
 			creep.remember('forceControllerUpgrade', false);
 		}
 	} else {
+<<<<<<< Updated upstream
+=======
+		console.log('room.builderStatselse');
+		//this seems to be adding 2 to upgrade controller every time population is greater than 3 (issue 1)
+		//the issue here is that the list creeps can return inconsistent sort and appears to eventually make every builder a controller contributer
+>>>>>>> Stashed changes
 		var c = 0;
 		for(var i = 0; i < this.creeps.length; i++) {
 			var creep = this.creeps[i];
 			if(creep.remember('role') != 'CreepBuilder') {
 				continue;
 			}
+			console.log('room.builderStatsForceUpgradeTrue');
 			creep.remember('forceControllerUpgrade', true);
 			c++;
 			if(c == 2) {
@@ -201,29 +227,9 @@ Room.prototype.distributeCarriers = function() {
 Room.prototype.distributeResources = function(type) {
 	var sources = this.resourceManager.getSources();
 	var perSource = Math.ceil(this.population.getType(type).total/sources.length);
-	//console.log('total: ' + this.population.getType(type).total);
-	//console.log('sources: ' + sources);
-	//console.log(sources[0].structure);
-	//console.log('persource: ' + perSource);
-	//this.sourceAssignment = new Map();	
-	//var sourcesInit = this.getSources();	
 	for(var i = 0; i < sources.length; i++) {
 		this.resourceAssignment[sources[i].id] = {primaryCount : 0, assignment : ''};
 	}
-	
-	//this.creeps = this.room.find(FIND_MY_CREEPS);
-
-	/* for(var i = 0; i < this.creeps.length; i++) {
-		var creepSource = this.creeps[i].memory.source;
-		var sourceFound = this.sourceAssignment[creepSource];
-		if (sourceFound != null) {			
-			this.sourceAssignment[creepSource].primaryCount++;
-		}		
-	} */
-	//console.log('SourceAssignment: ' + JSON.stringify(sourceAssignment));
-	//console.log('ResourceAssignment: ' + JSON.stringify(this.resourceAssignment));
-	
-	
 	
 	var counter = 0;
 	var source = 0;
