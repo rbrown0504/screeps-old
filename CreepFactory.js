@@ -11,7 +11,6 @@ var CreepShooter = require('CreepShooter');
 var CreepUpgrader = require('CreepUpgrader');
 
 function CreepFactory(depositManager, resourceManager, constructionsManager, population, roomHandler) {
-	//console.log('creepFactoryInitialized');
 	this.depositManager = depositManager;
 	this.resourceManager = resourceManager;
 	this.population = population;
@@ -69,7 +68,7 @@ CreepFactory.prototype.new = function(creepType, spawn) {
 	if(this.population.getTotalPopulation() < 5){
 		level = 1;
 	}
-	console.log('Level: ' + level);
+	console.log('Level:  ' + level);
 	// TOUGH          10
 	// MOVE           50
 	// CARRY          50
